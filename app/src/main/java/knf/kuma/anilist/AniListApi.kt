@@ -105,4 +105,78 @@ object AniListApi {
             vars
         )?.optJSONObject("SaveMediaListEntry") != null
     }
+
+    data class Stat(val label: String, val count: Int, val minutesWatched: Int, val meanScore: Double)
+
+    data class AnimeStatistics(
+        val count: Int,
+        val episodesWatched: Int,
+        val minutesWatched: Int,
+        val meanScore: Double,
+        val standardDeviation: Double,
+        val scores: List<Stat>,
+        val genres: List<Stat>,
+        val releaseYears: List<Stat>,
+        val formats: List<Stat>,
+        val statuses: List<Stat>
+    )
+
+    data class FavouriteAnime(val mediaId: Int, val title: String, val cover: String?)
+
+    data class UserProfile(
+        val id: Int,
+        val name: String,
+        val about: String?,
+        val avatarUrl: String?,
+        val bannerUrl: String?,
+        val createdAt: Long,
+        val siteUrl: String?,
+        val favourites: List<FavouriteAnime>,
+        val stats: AnimeStatistics
+    )
+
+    private fun JSONObject.str(key: String): String? = if (isNull(key)) null else optString(key).takeIf { it.isNotBlank() && it != "null" }
+
+    private fun JSONArray?.stats(labelKey: String): List<Stat> {
+        if (this == null) return emptyList()
+        return (0 until length()).mapNotNull { i ->
+            val o = optJSONObject(i) ?: return@mapNotNull null
+            val label = o.str(labelKey) ?: return@mapNotNull null
+            Stat(label, o.optInt("count"), o.optInt("minutesWatched"), o.optDouble("meanScore", 0.0).takeIf { !it.isNaN() } ?: 0.0)
+        }
+    }
+
+    /** Perfil + estadísticas de anime del usuario en una sola petición. null si falló. */
+    fun userProfile(userId: Int): UserProfile? {
+        val stat = "count episodesWatched minutesWatched meanScore"
+        val data = AniListAuth.query(
+            "query (\$u: Int) { User(id: \$u) { id name about(asHtml: false) avatar { large } bannerImage createdAt siteUrl " +
+                    "favourites { anime(page: 1, perPage: 15) { nodes { id title { romaji english native } coverImage { large } } } } " +
+                    "statistics { anime { count episodesWatched minutesWatched meanScore standardDeviation " +
+                    "statuses { status $stat } formats { format $stat } scores(sort: MEAN_SCORE) { score count episodesWatched minutesWatched } " +
+                    "genres(limit: 15, sort: COUNT_DESC) { genre $stat } releaseYears(sort: ID_DESC) { releaseYear $stat } } } } }",
+            JSONObject().put("u", userId)
+        )?.optJSONObject("User") ?: return null
+        val a = data.optJSONObject("statistics")?.optJSONObject("anime") ?: JSONObject()
+        val favNodes = data.optJSONObject("favourites")?.optJSONObject("anime")?.optJSONArray("nodes") ?: JSONArray()
+        val favs = (0 until favNodes.length()).mapNotNull { i ->
+            val m = favNodes.optJSONObject(i) ?: return@mapNotNull null
+            val t = m.optJSONObject("title") ?: JSONObject()
+            FavouriteAnime(m.optInt("id"), listOf("romaji", "english", "native").firstNotNullOfOrNull { t.str(it) } ?: "", m.optJSONObject("coverImage")?.str("large"))
+        }
+        return UserProfile(
+            data.optInt("id"), data.str("name") ?: "", data.str("about"), data.optJSONObject("avatar")?.str("large"),
+            data.str("bannerImage"), data.optLong("createdAt"), data.str("siteUrl"), favs,
+            AnimeStatistics(
+                a.optInt("count"), a.optInt("episodesWatched"), a.optInt("minutesWatched"),
+                a.optDouble("meanScore", 0.0).takeIf { !it.isNaN() } ?: 0.0,
+                a.optDouble("standardDeviation", 0.0).takeIf { !it.isNaN() } ?: 0.0,
+                a.optJSONArray("scores").stats("score").sortedByDescending { it.label.toIntOrNull() ?: 0 },
+                a.optJSONArray("genres").stats("genre"),
+                a.optJSONArray("releaseYears").stats("releaseYear"),
+                a.optJSONArray("formats").stats("format").sortedByDescending { it.count },
+                a.optJSONArray("statuses").stats("status").sortedByDescending { it.count }
+            )
+        )
+    }
 }
