@@ -52,7 +52,7 @@
                 android:orientation="horizontal"
                 android:paddingStart="6dp"
                 android:paddingEnd="0dp"
-                app:layoutManager=".custom.VariantLinearLayoutManager"
+                app:layoutManager="knf.kuma.custom.VariantLinearLayoutManager"
                 tools:listitem="@layout/item_fav_grid_card_simple"/>
 
             <TextView

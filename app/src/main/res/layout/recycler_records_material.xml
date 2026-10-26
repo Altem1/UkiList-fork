@@ -40,7 +40,7 @@
             android:paddingStart="10dp"
             android:paddingTop="10dp"
             android:paddingEnd="10dp"
-            app:layoutManager=".custom.VariantLinearLayoutManager"
+            app:layoutManager="knf.kuma.custom.VariantLinearLayoutManager"
             tools:listitem="@layout/item_record">
         </androidx.recyclerview.widget.RecyclerView>
 

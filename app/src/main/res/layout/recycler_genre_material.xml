@@ -37,7 +37,7 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/separator"
             android:clipToPadding="false"
-            app:layoutManager=".custom.VariantGridLayoutManager"
+            app:layoutManager="knf.kuma.custom.VariantGridLayoutManager"
             android:layoutAnimation="@anim/layout_fall_down"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
