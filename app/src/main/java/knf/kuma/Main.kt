@@ -204,10 +204,10 @@ class Main : GenericActivity(),
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, "Hola,\n" +
                             "\n" +
-                            "UKIKU es una aplicación rápida y simple que uso para ver mis animes favoritos.\n" +
+                            "UkiList es una app para ver anime que sincroniza sola con mi lista de AniList.\n" +
                             "\n" +
-                            "Descárgala gratis desde https://ukiku.app/")
-                }, "Compartir UKIKU"))
+                            "Descárgala gratis desde https://altem1.github.io/UkiList/")
+                }, "Compartir UkiList"))
             }
             actionInfo.onClick { AppInfoActivity.open(this@Main) }
             actionTrophy.onClick { AchievementActivity.open(this@Main) }

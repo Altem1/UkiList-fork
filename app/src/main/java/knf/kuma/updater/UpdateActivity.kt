@@ -181,7 +181,7 @@ class UpdateActivity : GenericActivity() {
             title(text = "¿Error al actualizar?")
             message(text = "Puedes descargar la actualización desde la pagina web oficial!")
             positiveButton(text = "Descargar") {
-                startActivity(Intent(Intent.ACTION_VIEW, "https://ukiku.app".toUri()))
+                startActivity(Intent(Intent.ACTION_VIEW, "https://altem1.github.io/UkiList/".toUri()))
             }
         }
     }
