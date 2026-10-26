@@ -28,13 +28,26 @@ object AniListMatcher {
         return null
     }
 
+    sealed class Lookup {
+        data class Found(val mediaId: Int) : Lookup()
+        object NotFound : Lookup()
+        object NetworkError : Lookup()
+    }
+
     /** App → AniList. Usa el título del anime (rōmaji en animeav1) para buscar su Media ID. */
-    fun findAniListId(aid: Int, slug: String, name: String): Int? {
-        if (aid != 0) dao.byAid(aid)?.let { return it.anilistId }
-        val results = AniListApi.search(name)
+    fun findAniListId(aid: Int, slug: String, name: String): Lookup {
+        if (aid != 0) dao.byAid(aid)?.let { return Lookup.Found(it.anilistId) }
+        val results = AniListApi.search(name) ?: return Lookup.NetworkError
         val n = normalize(name)
         val match = results.firstOrNull { m -> m.titles.any { normalize(it) == n } } ?: results.firstOrNull()
-        return match?.id?.also { if (aid != 0) dao.add(AniListMapping(aid, slug, it)) }
+            ?: return Lookup.NotFound
+        if (aid != 0) dao.add(AniListMapping(aid, slug, match.id))
+        return Lookup.Found(match.id)
+    }
+
+    /** Guarda la elección manual del usuario desde la pantalla de excepciones. */
+    fun saveManual(aid: Int, slug: String, mediaId: Int) {
+        if (aid != 0) dao.add(AniListMapping(aid, slug, mediaId))
     }
 
     private suspend fun searchCatalog(query: String): List<DirectoryAV1Min> {

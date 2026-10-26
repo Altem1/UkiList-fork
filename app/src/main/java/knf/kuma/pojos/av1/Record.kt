@@ -1,5 +1,6 @@
 package knf.kuma.pojos.av1
 
+import knf.kuma.anilist.AniListSeenHook
 import androidx.annotation.Keep
 import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
@@ -145,6 +146,28 @@ abstract class RecordDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract fun addChapterIgnore(chapter: Record)
+
+    /** Marcado manual como visto: además sincroniza con AniList si está activado. */
+    open fun markSeen(chapter: Record) {
+        addChapter(chapter)
+        AniListSeenHook.onSeen(listOf(chapter))
+    }
+
+    open fun markSeen(list: List<Record>) {
+        addAll(list)
+        AniListSeenHook.onSeen(list)
+    }
+
+    /** Desmarcado manual: baja el progreso en AniList al mayor episodio visto que quede. */
+    open fun markUnseen(aid: Int, number: Double) {
+        deleteChapter(aid, number)
+        AniListSeenHook.onUnseen(aid)
+    }
+
+    open fun markUnseen(chapter: Record) {
+        delete(chapter)
+        AniListSeenHook.onUnseen(chapter.aid)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun addAll(list: List<Record>)

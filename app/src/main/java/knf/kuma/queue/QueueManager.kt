@@ -231,7 +231,7 @@ object QueueManager {
     private fun markAllSeen(list: List<QueueObject>) {
         if (list.isNotEmpty())
             doAsync {
-                CacheDB.INSTANCE.recordAV1DAO().addAll(list.map { Record.fromLegacyChapter(it.chapter) })
+                CacheDB.INSTANCE.recordAV1DAO().markSeen(list.map { Record.fromLegacyChapter(it.chapter) })
                 syncData {
                     history()
                 }

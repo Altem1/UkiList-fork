@@ -233,13 +233,13 @@ class RecentsAV1Adapter internal constructor(private val fragment: Fragment, pri
                 holder.cardView.setOnLongClickListener {
                     if (!item.state.isSeen) {
                         doAsync {
-                            recordsDAO.addChapter(item.asRecord())
+                            recordsDAO.markSeen(item.asRecord())
                         }
                         item.state.isSeen = true
                         holder.animeOverlay.setSeen(seen = true, animate = true)
                     } else {
                         doAsync {
-                            recordsDAO.deleteChapter(item.aid, item.number)
+                            recordsDAO.markUnseen(item.aid, item.number)
                         }
                         item.state.isSeen = false
                         holder.animeOverlay.setSeen(seen = false, animate = true)
@@ -303,7 +303,7 @@ class RecentsAV1Adapter internal constructor(private val fragment: Fragment, pri
                         if (CastUtil.get().connected() &&
                                 item.state.fileWrapper.exist && (obj == null || obj.state == DownloadObject.COMPLETED)) {
                             doAsync {
-                                recordsDAO.addChapter(item.asRecord())
+                                recordsDAO.markSeen(item.asRecord())
                                 syncData { history() }
                             }
                             item.state.isSeen = true

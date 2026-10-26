@@ -66,13 +66,13 @@ class RecentsAV1Adapter(val fragment: Fragment, val isMaterial: Boolean, private
             holder.root.onLongClick(returnValue = true) {
                 if (item.state.isSeen) {
                     doAsync {
-                        CacheDB.INSTANCE.recordAV1DAO().deleteChapter(item.aid, item.number)
+                        CacheDB.INSTANCE.recordAV1DAO().markUnseen(item.aid, item.number)
                     }
                     item.state.isSeen = false
                     holder.seenOverlay.setSeen(seen = false, animate = true)
                 } else {
                     doAsync {
-                        CacheDB.INSTANCE.recordAV1DAO().addChapter(item.asRecord())
+                        CacheDB.INSTANCE.recordAV1DAO().markSeen(item.asRecord())
                     }
                     item.state.isSeen = true
                     holder.seenOverlay.setSeen(seen = true, animate = true)

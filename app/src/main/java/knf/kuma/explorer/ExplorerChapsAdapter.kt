@@ -86,14 +86,14 @@ class ExplorerChapsAdapter internal constructor(val fragment: Fragment, private 
         holder.cardView.setOnLongClickListener {
             if (!chapObject.isSeen) {
                 fragment.lifecycleScope.launch(Dispatchers.IO){
-                    recordsDAO.addChapter(Record.fromDownloaded(chapObject.obj))
+                    recordsDAO.markSeen(Record.fromDownloaded(chapObject.obj))
                     syncData { history() }
                 }
                 chapObject.isSeen = true
                 holder.seenOverlay.setSeen(true, true)
             } else {
                 fragment.lifecycleScope.launch(Dispatchers.IO) {
-                    recordsDAO.delete(Record.fromDownloaded(chapObject.obj))
+                    recordsDAO.markUnseen(Record.fromDownloaded(chapObject.obj))
                     syncData { history() }
                 }
                 chapObject.isSeen = false

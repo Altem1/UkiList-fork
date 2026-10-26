@@ -323,13 +323,13 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
         holder.cardView.setOnClickListener {
             if (chapter.isSeen) {
                 fragment.lifecycleScope.launch(Dispatchers.IO){
-                    recordsDAO.deleteChapter(anime.aid, chapter.number)
+                    recordsDAO.markUnseen(anime.aid, chapter.number)
                 }
                 chapter.isSeen = false
                 holder.chapter.setTextColor(ContextCompat.getColor(context, R.color.textPrimary))
             } else {
                 fragment.lifecycleScope.launch(Dispatchers.IO){
-                    recordsDAO.addChapter(chapter.asRecord(anime))
+                    recordsDAO.markSeen(chapter.asRecord(anime))
                 }
                 chapter.isSeen = true
                 holder.chapter.setTextColor(ContextCompat.getColor(context, EAHelper.getThemeColor()))

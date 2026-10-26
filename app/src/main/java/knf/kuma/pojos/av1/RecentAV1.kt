@@ -147,9 +147,9 @@ fun RecentAV1.openInfo(context: Context?) {
 fun RecentAV1.toggleSeen(scope: CoroutineScope, seenDAO: RecordDao) {
     scope.launch(Dispatchers.IO) {
         if (!state.isSeen)
-            seenDAO.addChapter(asRecord())
+            seenDAO.markSeen(asRecord())
         else
-            seenDAO.deleteChapter(aid, number)
+            seenDAO.markUnseen(aid, number)
         syncData { history() }
     }
 }

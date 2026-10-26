@@ -427,12 +427,12 @@ fun <T> noCrashLetNullable(onCrash: T? = null, func: () -> T): T? {
 
 fun String?.toast() {
     if (!this.isNullOrEmpty())
-        Toaster.toast(this)
+        RoundedToast.show(this)
 }
 
 fun String?.toastLong() {
     if (!this.isNullOrEmpty())
-        Toaster.toastLong(this)
+        RoundedToast.show(this, long = true)
 }
 
 fun LifecycleOwner.doOnUI(enableLog: Boolean = true, onLog: (text: String) -> Unit = {}, func: suspend () -> Unit) {

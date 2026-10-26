@@ -174,7 +174,7 @@ class RecentAV1ModelsAdapter(private val fragment: Fragment) : ListAdapter<Recen
 
     private fun setAsSeen(item: RecentAV1) {
         fragment.lifecycleScope.launch(Dispatchers.IO) {
-            recordsDAO.addChapter(item.asRecord())
+            recordsDAO.markSeen(item.asRecord())
             syncData {
                 history()
             }

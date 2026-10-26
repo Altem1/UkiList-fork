@@ -61,6 +61,16 @@
                     android:visibility="gone"
                     app:srcCompat="@drawable/ic_chap_down"/>
 
+                <ImageView
+                    android:id="@+id/anilist_sync"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="4dp"
+                    android:alpha="0.7"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_anilist_synced"/>
+
                 <ImageButton
                     android:id="@+id/actions"
                     style="@style/Base.Widget.AppCompat.Button.Borderless"

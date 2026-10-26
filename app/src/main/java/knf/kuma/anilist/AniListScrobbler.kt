@@ -93,35 +93,63 @@ class AniListScrobbleTracker(private val context: Context, intent: Intent) : Pla
 
 class AniListScrobbleWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
+    private val states = CacheDB.INSTANCE.aniListScrobbleDAO()
+
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        if (!AniListAuth.isLoggedIn) return@withContext Result.success()
         val slug = inputData.getString(EXTRA_SLUG)
         val name = inputData.getString(EXTRA_NAME)
         val episode = inputData.getInt(EXTRA_NUMBER, 0)
-        val aid = inputData.getInt(EXTRA_AID, 0).takeIf { it != 0 }
-            ?: slug?.let { CacheDB.INSTANCE.directoryDAO().findBySlug(it)?.aid } ?: 0
-        Log.i("AniList", "Scrobble: aid=$aid slug=$slug name=$name ep=$episode")
         if (slug == null || name == null || episode <= 0) return@withContext Result.failure()
-        val mediaId = AniListMatcher.findAniListId(aid, slug, name)
-        Log.i("AniList", "Scrobble: mediaId=$mediaId")
-        mediaId ?: return@withContext Result.retry()
-        val (current, total) = AniListApi.currentProgress(mediaId) ?: return@withContext Result.retry()
-        Log.i("AniList", "Scrobble: actual=$current total=$total -> $episode")
-        if (current != null && current >= episode) return@withContext Result.success()
+        val aid = inputData.getInt(EXTRA_AID, 0).takeIf { it != 0 }
+            ?: CacheDB.INSTANCE.directoryDAO().findBySlug(slug)?.aid ?: 0
+        fun state(status: Int, reason: String? = null) =
+            states.set(AniListScrobbleState(slug, episode, aid, name, status, reason))
+        fun failOrRetry(reason: String): Result =
+            if (runAttemptCount >= MAX_ATTEMPTS) { state(AniListScrobbleState.FAILED, reason); Result.failure() }
+            else { state(AniListScrobbleState.PENDING, reason); Result.retry() }
+
+        if (!AniListAuth.isLoggedIn) return@withContext failOrRetry("Sin sesión de AniList")
+        Log.i("AniList", "Scrobble: aid=$aid slug=$slug name=$name ep=$episode")
+        val forced = inputData.getInt(EXTRA_MEDIA_ID, 0)
+        val mediaId = if (forced != 0) forced else when (val r = AniListMatcher.findAniListId(aid, slug, name)) {
+            is AniListMatcher.Lookup.Found -> r.mediaId
+            AniListMatcher.Lookup.NotFound -> {
+                state(AniListScrobbleState.FAILED, "AniList no encontró \"$name\"")
+                return@withContext Result.failure()
+            }
+            AniListMatcher.Lookup.NetworkError -> return@withContext failOrRetry("No se pudo conectar con AniList")
+        }
+        val (current, total) = AniListApi.currentProgress(mediaId)
+            ?: return@withContext failOrRetry("No se pudo conectar con AniList")
+        Log.i("AniList", "Scrobble: mediaId=$mediaId actual=$current total=$total -> $episode")
+        if (current != null && current >= episode) {
+            state(AniListScrobbleState.SYNCED)
+            return@withContext Result.success()
+        }
         val status = if (total != null && episode >= total) "COMPLETED" else "CURRENT"
         if (AniListApi.saveProgress(mediaId, episode, status)) {
+            state(AniListScrobbleState.SYNCED)
             withContext(Dispatchers.Main) { "AniList: $name, episodio $episode registrado".toast() }
             Result.success()
-        } else Result.retry()
+        } else failOrRetry("AniList rechazó la actualización")
     }
 
     companion object {
-        fun enqueue(context: Context, aid: Int, slug: String, name: String, episode: Int) {
+        private const val EXTRA_MEDIA_ID = "anilist_media_id"
+        private const val MAX_ATTEMPTS = 5
+
+        /** mediaId != 0 fuerza el anime de AniList (elección manual en la pantalla de excepciones). */
+        fun enqueue(context: Context, aid: Int, slug: String, name: String, episode: Int, mediaId: Int = 0) {
+            Thread {
+                CacheDB.INSTANCE.aniListScrobbleDAO()
+                    .set(AniListScrobbleState(slug, episode, aid, name, AniListScrobbleState.PENDING))
+            }.start()
             val request = OneTimeWorkRequestBuilder<AniListScrobbleWorker>()
-                .setInputData(workDataOf(EXTRA_AID to aid, EXTRA_SLUG to slug, EXTRA_NAME to name, EXTRA_NUMBER to episode))
+                .setInputData(workDataOf(EXTRA_AID to aid, EXTRA_SLUG to slug, EXTRA_NAME to name,
+                    EXTRA_NUMBER to episode, EXTRA_MEDIA_ID to mediaId))
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .build()
-            WorkManager.getInstance(context).enqueueUniqueWork("anilist-scrobble-$slug-$episode", ExistingWorkPolicy.KEEP, request)
+            WorkManager.getInstance(context).enqueueUniqueWork("anilist-scrobble-$slug-$episode", ExistingWorkPolicy.REPLACE, request)
         }
     }
 }

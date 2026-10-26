@@ -19,11 +19,12 @@ object AniListApi {
         return Media(getInt("id"), titles, if (isNull("episodes")) null else getInt("episodes"))
     }
 
-    fun search(title: String): List<Media> {
+    /** null si falló la conexión; lista vacía si AniList no encontró nada. */
+    fun search(title: String): List<Media>? {
         val data = AniListAuth.query(
             "query (\$s: String) { Page(perPage: 8) { media(search: \$s, type: ANIME) { $MEDIA_FIELDS } } }",
             JSONObject().put("s", title)
-        ) ?: return emptyList()
+        ) ?: return null
         val arr = data.getJSONObject("Page").getJSONArray("media")
         return (0 until arr.length()).map { arr.getJSONObject(it).toMedia() }
     }
