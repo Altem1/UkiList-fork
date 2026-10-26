@@ -80,12 +80,16 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
 
     init {
         setHasStableIds(true)
-        noCrash {
-            CacheDB.INSTANCE.aniListScrobbleDAO().bySlugLive(anime.slug).observe(fragment.viewLifecycleOwner) { list ->
+        // El adaptador se crea en un hilo de fondo y LiveData solo se observa en el principal.
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            // Si la vista del fragmento ya no existe, viewLifecycleOwner lanza: se usa el fragmento.
+            val owner = runCatching { fragment.viewLifecycleOwner }.getOrDefault(fragment)
+            CacheDB.INSTANCE.aniListScrobbleDAO().bySlugLive(anime.slug).observe(owner) { list ->
                 syncStates = list.associate { it.episode to it.status }
                 notifyItemRangeChanged(0, itemCount, PAYLOAD_SYNC)
             }
         }
+        knf.kuma.anilist.AniListBackfill.check(anime.aid, anime.slug, anime.name)
         if (chapters.isNotEmpty()) {
             noCrash {
                 doAsync {

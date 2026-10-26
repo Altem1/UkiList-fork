@@ -44,6 +44,13 @@ interface AniListScrobbleDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun addIgnore(states: List<AniListScrobbleState>)
 
+    @Query("SELECT episode FROM anilist_scrobble WHERE slug = :slug")
+    fun episodes(slug: String): List<Int>
+
+    /** AniList guarda progreso: si el episodio N quedó sincronizado, también los anteriores. */
+    @Query("UPDATE anilist_scrobble SET status = 1, reason = NULL WHERE slug = :slug AND episode <= :episode")
+    fun markSyncedUpTo(slug: String, episode: Int)
+
     @Query("DELETE FROM anilist_scrobble WHERE slug = :slug AND episode = :episode")
     fun remove(slug: String, episode: Int)
 

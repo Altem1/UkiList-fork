@@ -132,6 +132,9 @@ abstract class RecordDao {
     @Query("SELECT * FROM Record WHERE eid IN (:eids) ORDER BY number DESC LIMIT 1")
     abstract fun getLast(eids: List<Int>): Record?
 
+    @Query("SELECT * FROM Record WHERE aid = :aid")
+    abstract fun byAid(aid: Int): List<Record>
+
     @Query("SELECT * FROM Record WHERE aid = :aid ORDER BY number DESC LIMIT 1")
     abstract suspend fun getLastByAid(aid: Int): Record?
 

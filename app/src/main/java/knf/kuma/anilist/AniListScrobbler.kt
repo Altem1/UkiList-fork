@@ -103,8 +103,10 @@ class AniListScrobbleWorker(context: Context, params: WorkerParameters) : Corout
         if (slug == null || name == null || episode <= 0) return@withContext Result.failure()
         val aid = inputData.getInt(EXTRA_AID, 0).takeIf { it != 0 }
             ?: CacheDB.INSTANCE.directoryDAO().findBySlug(slug)?.aid ?: 0
-        fun state(status: Int, reason: String? = null) =
+        fun state(status: Int, reason: String? = null) {
             states.set(AniListScrobbleState(slug, episode, aid, name, status, reason))
+            if (status == AniListScrobbleState.SYNCED) states.markSyncedUpTo(slug, episode)
+        }
         fun failOrRetry(reason: String): Result =
             if (runAttemptCount >= MAX_ATTEMPTS) { state(AniListScrobbleState.FAILED, reason); Result.failure() }
             else { state(AniListScrobbleState.PENDING, reason); Result.retry() }
