@@ -225,6 +225,22 @@
         <activity
             android:name=".animeinfo.img.ActivityImgFull"
             android:theme="@style/AppTheme.FullScreen" />
+        <activity
+            android:name=".anilist.AniListCallbackActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="anilist-callback"
+                    android:scheme="ukiku" />
+            </intent-filter>
+        </activity>
         <activity android:name=".record.RecordActivity" />
         <activity android:name=".seeing.SeeingActivity" />
         <activity android:name=".emision.EmissionActivity" />

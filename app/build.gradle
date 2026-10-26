@@ -16,6 +16,7 @@ android {
         versionCode 238
         versionName "6.0.8"
         multiDexEnabled true
+        buildConfigField "String", "ANILIST_CLIENT_ID", "\"${localProperties['ANILIST_CLIENT_ID'] ?: ""}\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -132,6 +133,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.browser:browser:1.5.0' //Keep
+    implementation 'androidx.security:security-crypto:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0'
