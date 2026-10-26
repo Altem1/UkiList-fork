@@ -13,7 +13,6 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
-import com.dropbox.core.android.Auth
 import knf.kuma.BuildConfig
 import knf.kuma.R
 import knf.kuma.achievements.AchievementManager
@@ -60,7 +59,7 @@ class BackUpActivity : GenericActivity(), SyncItemView.OnClick {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         setContentView(binding.root)
         service = Backups.createService()
-        binding.layMain.loginDropbox.setOnClickListener { onDropBoxLogin() }
+        binding.layMain.loginDropbox.visibility = View.GONE
         if (!PrefsUtil.isAdsEnabled && !BuildConfig.DEBUG && !admFile.exists() && !PrefsUtil.isSubscriptionEnabled) {
             binding.layMain.loginFirestore.isEnabled = false
             binding.layMain.adsRequired.visibility = View.VISIBLE
@@ -267,7 +266,7 @@ class BackUpActivity : GenericActivity(), SyncItemView.OnClick {
     override fun onResume() {
         super.onResume()
         if (waitingLogin) {
-            val token = Auth.getOAuth2Token()
+            val token: String? = null
             if (service is DropBoxService && service?.logIn(token) == true) {
                 Backups.type = Backups.Type.DROPBOX
             }

@@ -18,7 +18,6 @@ import androidx.leanback.widget.Presenter
 import androidx.leanback.widget.Row
 import androidx.leanback.widget.RowPresenter
 import androidx.lifecycle.lifecycleScope
-import com.dropbox.core.android.Auth
 import knf.kuma.App
 import knf.kuma.Diagnostic
 import knf.kuma.R
@@ -293,7 +292,7 @@ class TVMainFragment : BrowseSupportFragment(), OnItemViewClickedListener, View.
     override fun onResume() {
         super.onResume()
         if (waitingLoginDropbox) {
-            val token = Auth.getOAuth2Token()
+            val token: String? = null
             if (service is DropBoxService && service?.logIn(token) == true) {
                 Backups.type = Backups.Type.DROPBOX
             }

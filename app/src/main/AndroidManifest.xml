@@ -254,20 +254,6 @@
         <activity
             android:name=".backup.BackUpActivity"
             android:theme="@style/AppTheme.Translucent" />
-        <activity
-            android:name="com.dropbox.core.android.AuthActivity"
-            android:configChanges="orientation|keyboard"
-            android:exported="true"
-            android:launchMode="singleTask">
-            <intent-filter>
-                <data android:scheme="db-qtjow4hsk06vt19" />
-
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
         <activity android:name=".recommended.RecommendActivity" />
         <activity android:name=".recommended.RankingActivity" />
         <service
@@ -313,13 +299,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/path_providers" />
         </provider>
-
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="${admobID}" />
-        <meta-data
-            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
-            android:value="true" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
