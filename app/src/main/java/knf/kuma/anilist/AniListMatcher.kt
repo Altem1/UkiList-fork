@@ -50,6 +50,11 @@ object AniListMatcher {
         if (aid != 0) dao.add(AniListMapping(aid, slug, mediaId))
     }
 
+    /** Candidatos del catálogo para un título de AniList, cuando no hubo coincidencia exacta. */
+    suspend fun catalogCandidates(title: String): List<DirectoryAV1Min> = runCatching { searchCatalog(title) }.getOrDefault(emptyList())
+
+    fun saveMapping(aid: Int, slug: String, mediaId: Int) = dao.add(AniListMapping(aid, slug, mediaId))
+
     private suspend fun searchCatalog(query: String): List<DirectoryAV1Min> {
         val url = Uri.parse("https://animeav1.com/catalogo").buildUpon()
             .appendQueryParameter("search", query).build().toString()

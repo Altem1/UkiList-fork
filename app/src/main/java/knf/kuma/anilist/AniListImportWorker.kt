@@ -60,8 +60,8 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
                         if (state != null && current?.state != state)
                             organizerDAO.add(dir.asOrganizer(state))
                     }
-                } else if (state != null && current == null) {
-                    organizerDAO.add(Organizer(mapping.aid, entry.media.titles.first(), mapping.slug, -1, state))
+                } else if (state != null && current?.state != state) {
+                    organizerDAO.add(Organizer(mapping.aid, entry.media.titles.first(), mapping.slug, current?.lastWatched ?: -1, state))
                 }
                 imported++
             } catch (e: Exception) {

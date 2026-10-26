@@ -141,7 +141,9 @@ class AnimeDetailsHolder(val view: View) {
                                 if (position == 0)
                                     CacheDB.INSTANCE.organizerDAO().remove(animeObject.asOrganizer(position))
                                 else
-                                    CacheDB.INSTANCE.organizerDAO().add(animeObject.asOrganizer(position))
+                                    CacheDB.INSTANCE.organizerDAO().add(animeObject.asOrganizer(position)).also {
+                                        knf.kuma.anilist.AniListStatusWorker.enqueue(knf.kuma.App.context, animeObject.aid, animeObject.slug, animeObject.name, position)
+                                    }
                                 syncData { seeing() }
                             }
                         }

@@ -113,4 +113,6 @@
     <string name="anilist_medal_9">Relentless Critic|50+ anime rated</string>
     <string name="anilist_medal_10">Genre Polymath|5+ anime in 10 genres</string>
     <string name="anilist_medal_11">Specialist|50+ anime of your top genre</string>
+    <string name="anilist_not_in_catalog">%s is not in the app catalog; opening on AniList</string>
+    <string name="anilist_pick_anime">Pick the right anime</string>
 </resources>

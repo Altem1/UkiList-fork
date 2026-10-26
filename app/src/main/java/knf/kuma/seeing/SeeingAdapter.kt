@@ -68,11 +68,11 @@ internal class SeeingAdapter(private val activity: Activity, private val isFullL
                 popupMenu.setOnMenuItemClickListener { menuItem ->
                     doAsync {
                         when (menuItem.itemId) {
-                            R.id.watching -> seeingDAO.update(seeingObject.organizer.also { it.state = 1 })
-                            R.id.considering -> seeingDAO.update(seeingObject.organizer.also { it.state = 2 })
-                            R.id.completed -> seeingDAO.update(seeingObject.organizer.also { it.state = 3 })
-                            R.id.droped -> seeingDAO.update(seeingObject.organizer.also { it.state = 4 })
-                            R.id.paused -> seeingDAO.update(seeingObject.organizer.also { it.state = 5 })
+                            R.id.watching -> seeingDAO.update(seeingObject.organizer.also { it.state = 1 }).also { knf.kuma.anilist.AniListStatusWorker.enqueue(knf.kuma.App.context, seeingObject.organizer.aid, seeingObject.organizer.slug, seeingObject.organizer.name, 1) }
+                            R.id.considering -> seeingDAO.update(seeingObject.organizer.also { it.state = 2 }).also { knf.kuma.anilist.AniListStatusWorker.enqueue(knf.kuma.App.context, seeingObject.organizer.aid, seeingObject.organizer.slug, seeingObject.organizer.name, 2) }
+                            R.id.completed -> seeingDAO.update(seeingObject.organizer.also { it.state = 3 }).also { knf.kuma.anilist.AniListStatusWorker.enqueue(knf.kuma.App.context, seeingObject.organizer.aid, seeingObject.organizer.slug, seeingObject.organizer.name, 3) }
+                            R.id.droped -> seeingDAO.update(seeingObject.organizer.also { it.state = 4 }).also { knf.kuma.anilist.AniListStatusWorker.enqueue(knf.kuma.App.context, seeingObject.organizer.aid, seeingObject.organizer.slug, seeingObject.organizer.name, 4) }
+                            R.id.paused -> seeingDAO.update(seeingObject.organizer.also { it.state = 5 }).also { knf.kuma.anilist.AniListStatusWorker.enqueue(knf.kuma.App.context, seeingObject.organizer.aid, seeingObject.organizer.slug, seeingObject.organizer.name, 5) }
                         }
                         syncData { seeing() }
                         if (isFullList)

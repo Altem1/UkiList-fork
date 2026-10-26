@@ -356,4 +356,6 @@
     <string name="anilist_medal_9">Crítico Implacable|50+ animes calificados</string>
     <string name="anilist_medal_10">Polímata de Géneros|5+ animes en 10 géneros</string>
     <string name="anilist_medal_11">Especialista|50+ animes de tu género favorito</string>
+    <string name="anilist_not_in_catalog">%s no está en el catálogo de la app; se abre en AniList</string>
+    <string name="anilist_pick_anime">Elige el anime correcto</string>
 </resources>

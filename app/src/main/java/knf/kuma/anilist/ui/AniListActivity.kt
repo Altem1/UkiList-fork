@@ -20,6 +20,8 @@ import com.google.android.material.tabs.TabLayout
 import knf.kuma.R
 import knf.kuma.anilist.AniListApi
 import knf.kuma.anilist.AniListAuth
+import knf.kuma.anilist.AniListMatcher
+import com.afollestad.materialdialogs.list.listItems
 import knf.kuma.commons.EAHelper
 import knf.kuma.commons.toast
 import knf.kuma.database.CacheDB
@@ -210,11 +212,34 @@ class AniListActivity : GenericActivity() {
     /** Abre la ficha del anime en la app para seguir viendo; la relación sale del mapeo AniList ↔ catálogo. */
     private fun openInApp(item: AniListApi.ListItem) {
         lifecycleScope.launch {
-            val mapping = withContext(Dispatchers.IO) { CacheDB.INSTANCE.aniListMappingDAO().byAniList(item.mediaId) }
-            if (mapping == null) "${item.title} no está en el catálogo de la app".toast()
-            else knf.kuma.animeinfo.ActivityAnimeMaterial.open(this@AniListActivity, "https://animeav1.com/media/${mapping.slug}")
+            val mapping = withContext(Dispatchers.IO) {
+                CacheDB.INSTANCE.aniListMappingDAO().byAniList(item.mediaId)
+                    ?: runCatching { AniListMatcher.findAppAnime(AniListApi.Media(item.mediaId, listOf(item.title), item.episodes)) }.getOrNull()
+            }
+            if (mapping != null) return@launch openSlug(mapping.slug)
+            // Sin coincidencia exacta: se busca en el catálogo y, si hay duda, elige el usuario (y se recuerda).
+            val candidates = withContext(Dispatchers.IO) { AniListMatcher.catalogCandidates(item.title) }.take(8)
+            when (candidates.size) {
+                0 -> {
+                    getString(R.string.anilist_not_in_catalog, item.title).toast()
+                    AniListDrawer.openUrl(this@AniListActivity, "https://anilist.co/anime/${item.mediaId}/")
+                }
+                1 -> pick(item, candidates[0])
+                else -> com.afollestad.materialdialogs.MaterialDialog(this@AniListActivity).show {
+                    title(R.string.anilist_pick_anime)
+                    listItems(items = candidates.map { it.name }) { _, index, _ -> pick(item, candidates[index]) }
+                }
+            }
         }
     }
+
+    private fun pick(item: AniListApi.ListItem, anime: knf.kuma.pojos.av1.DirectoryAV1Min) {
+        lifecycleScope.launch(Dispatchers.IO) { AniListMatcher.saveMapping(anime.aid, anime.slug, item.mediaId) }
+        openSlug(anime.slug)
+    }
+
+    private fun openSlug(slug: String) =
+        knf.kuma.animeinfo.ActivityAnimeMaterial.open(this, "https://animeav1.com/media/$slug")
 
     companion object {
         private const val EXTRA_TAB = "tab"
