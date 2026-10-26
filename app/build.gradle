@@ -237,7 +237,7 @@ dependencies {
     implementation 'com.scottyab:secure-preferences-lib:0.1.7'
     implementation 'com.github.florent37:expansionpanel:1.2.2'
     implementation 'com.github.evgenyneu:js-evaluator-for-android:v5.0.0'
-    implementation 'com.github.vkay94.dtpv:doubletapplayerview:1.0.5'
+    implementation project(':dtpv')
     implementation 'org.conscrypt:conscrypt-android:2.5.3'
     testImplementation 'junit:junit:4.13.2'
     //Kotlin
