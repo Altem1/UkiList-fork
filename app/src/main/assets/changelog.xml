@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    <release code="239" version="1.0.0">
+        <change type="new">UkiList: fork de UKIKU con sincronización automática con AniList</change>
+        <change type="new">Conectar con AniList (OAuth) desde Ajustes &gt; Sincronización</change>
+        <change type="new">Importar biblioteca de AniList: marca episodios vistos y estados de la lista</change>
+        <change type="new">Scrobble automático al ver el 85% del episodio o al terminarlo</change>
+        <change type="new">Marcar o desmarcar episodios a mano sincroniza el progreso con AniList</change>
+        <change type="new">Nube de sincronización por episodio y pantalla de excepciones de AniList</change>
+        <change type="new">Sección AniList en el menú: listas, Estadísticas y Perfil con medallas</change>
+        <change type="new">Autoplay del siguiente episodio estilo Netflix con cuenta regresiva y cambio de servidor</change>
+        <change type="new">Los estados del anime (Viendo, Considerando, etc.) se suben a AniList</change>
+        <change type="change">Nuevo nombre e ícono, Acerca de con créditos y licencia MIT de UKIKU</change>
+        <change type="change">Sin anuncios, Noticias ni FAQ en el menú</change>
+    </release>
     <release code="238" version="6.0.8">
         <change type="fix">Error al mostrar estado y día de emisión en información del anime</change>
         <change type="fix">Errores varios</change>

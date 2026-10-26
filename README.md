@@ -1,14 +1,14 @@
-# UKIKU AniList (UkiList)
+# UkiList
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Fork de UKIKU](https://img.shields.io/badge/Fork%20de-jordyamc%2FUKIKU-orange)](https://github.com/jordyamc/UKIKU)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 
-**UKIKU AniList** (`com.altem1.ukilist`) es un fork no oficial de [UKIKU](https://github.com/jordyamc/UKIKU) enfocado en la integración y sincronización automática con [AniList](https://anilist.co), libre de anuncios.
+**UkiList** (`com.altem1.ukilist`) es un fork no oficial de [UKIKU](https://github.com/jordyamc/UKIKU) enfocado en la integración y sincronización automática con [AniList](https://anilist.co), libre de anuncios.
 
 ---
 
-## ✨ Novedades respecto a UKIKU original
+## Novedades respecto a UKIKU original
 
 - **Sincronización con AniList (OAuth2)**:
   - **Importación de biblioteca**: importa tu lista de animes desde AniList y marca automáticamente los episodios vistos en la base de datos local.
@@ -23,7 +23,7 @@
 
 ---
 
-## 🛠️ Compilación
+## Compilación
 
 1. Clona este repositorio:
    ```bash
@@ -45,18 +45,18 @@
 
 ---
 
-## 🙏 Créditos y agradecimientos
+## Créditos y agradecimientos
 
 Este proyecto existe gracias al trabajo de código abierto de sus autores originales:
 
 - **[UKIKU](https://github.com/jordyamc/UKIKU)** — Proyecto original creado y desarrollado por **Jordy Alexis Mendoza Caballero** ([@jordyamc](https://github.com/jordyamc)).
 - **[DoubleTapPlayerView](https://github.com/vkay94/DoubleTapPlayerView)** — Librería de gestos de doble toque creada por **Viktor Krez** ([@vkay94](https://github.com/vkay94)), incluida en este repositorio bajo el módulo `:dtpv` (portada a Media3).
 - **[AniList](https://anilist.co)** — Sincronización y metadatos de seguimiento proporcionados a través de la [API pública GraphQL de AniList](https://github.com/AniList/ApiV2-GraphQL-Docs).
-- **Fork (`UKIKU AniList` / `UkiList`)** — Mantenido por **Altem01** ([@Altem1](https://github.com/Altem1)).
+- **Fork (`UkiList`)** — Mantenido por **Altem01** ([@Altem1](https://github.com/Altem1)).
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto se distribuye bajo la **Licencia MIT**, conservando íntegros los derechos de autor y avisos de licencia del proyecto original [UKIKU](https://github.com/jordyamc/UKIKU) ([`LICENSE`](LICENSE)):
 
