@@ -354,6 +354,15 @@ class ActivityAnimeMaterial : GenericActivity(), AnimeActivityMaterialHolder.Int
             activity.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity, view, sharedImg).toBundle())
         }
 
+        fun openByAid(context: Context, aid: Int, title: String, img: String?) {
+            val intent = Intent(context, DesignUtils.infoClass)
+            intent.putExtra(keyTitle, title)
+            intent.putExtra(keyAid, aid.toString())
+            intent.putExtra(keyImg, img ?: PatternUtil.getCover(aid.toString()))
+            intent.putExtra(keyAidOnly, true)
+            context.startActivity(intent)
+        }
+
         fun open(context: Context, url: String) {
             val intent = Intent(context, DesignUtils.infoClass)
             intent.data = url.toUri()

@@ -21,6 +21,8 @@ import knf.kuma.R
 import knf.kuma.anilist.AniListApi
 import knf.kuma.anilist.AniListAuth
 import knf.kuma.commons.EAHelper
+import knf.kuma.commons.toast
+import knf.kuma.database.CacheDB
 import knf.kuma.custom.GenericActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -126,6 +128,8 @@ class AniListActivity : GenericActivity() {
             val title: TextView = v.findViewById(R.id.title)
             val text: TextView = v.findViewById(R.id.progress_text)
             val bar: ProgressBar = v.findViewById(R.id.progress_bar)
+            val openAnime: View = v.findViewById(R.id.open_anime)
+            val openWeb: View = v.findViewById(R.id.open_web)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -142,9 +146,21 @@ class AniListActivity : GenericActivity() {
             holder.bar.max = item.episodes ?: maxOf(item.progress, 1)
             holder.bar.progress = item.progress
             Glide.with(holder.cover).load(item.cover).into(holder.cover)
-            holder.itemView.setOnClickListener {
+            holder.openWeb.setOnClickListener {
                 AniListDrawer.openUrl(this@AniListActivity, "https://anilist.co/anime/${item.mediaId}/")
             }
+            val openAnime = View.OnClickListener { openInApp(item) }
+            holder.openAnime.setOnClickListener(openAnime)
+            holder.itemView.setOnClickListener(openAnime)
+        }
+    }
+
+    /** Abre la ficha del anime en la app para seguir viendo; la relación sale del mapeo AniList ↔ catálogo. */
+    private fun openInApp(item: AniListApi.ListItem) {
+        lifecycleScope.launch {
+            val mapping = withContext(Dispatchers.IO) { CacheDB.INSTANCE.aniListMappingDAO().byAniList(item.mediaId) }
+            if (mapping == null) "${item.title} no está en el catálogo de la app".toast()
+            else knf.kuma.animeinfo.ActivityAnimeMaterial.openByAid(this@AniListActivity, mapping.aid, item.title, null)
         }
     }
 

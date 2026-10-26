@@ -40,7 +40,7 @@
     <item
         android:id="@+id/drawer_records"
         android:icon="@drawable/ic_record"
-        android:visible="@bool/showUncensored"
+        android:visible="false"
         android:title="Historial"/>
     <item
         android:id="@+id/drawer_random"
