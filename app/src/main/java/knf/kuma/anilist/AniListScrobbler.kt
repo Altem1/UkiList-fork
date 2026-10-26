@@ -22,10 +22,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.floor
 
-private const val EXTRA_AID = "anilist_aid"
-private const val EXTRA_SLUG = "anilist_slug"
-private const val EXTRA_NAME = "anilist_name"
-private const val EXTRA_NUMBER = "anilist_number"
+const val EXTRA_AID = "anilist_aid"
+const val EXTRA_SLUG = "anilist_slug"
+const val EXTRA_NAME = "anilist_name"
+const val EXTRA_NUMBER = "anilist_number"
 
 /** Adjunta al intent del reproductor los datos del episodio necesarios para el scrobble. */
 fun Intent.withScrobble(chapter: ChapterWID?): Intent = apply {

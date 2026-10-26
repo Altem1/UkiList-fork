@@ -66,6 +66,8 @@ object FileActions {
     private var snackBarManager: SnackProgressBarManager? = null
     private var servers: MutableList<Server> = ArrayList()
     private var selected = 0
+    /** 0 subtitulado, 1 doblado: se pasa al reproductor para el autoplay del siguiente episodio. */
+    private var selectedLang = 0
 
     fun stream(fragment: Fragment, anime: DirectoryAV1, chapter: Chapter, isQueued: Boolean = false, callback: ActionCallback) {
         try {
@@ -208,6 +210,7 @@ object FileActions {
                         )
                     ).toMutableList()
                     val langSelect: (Int) -> Unit = { index ->
+                        selectedLang = index
                         servers = if (index == 0) {
                             subServers
                         } else {
@@ -438,6 +441,7 @@ object FileActions {
     }
 
     private fun startStreaming(actionRequest: ActionRequest, option: Option) {
+        val serverName = servers.getOrNull(selected)?.name
         reset()
         if (actionRequest.item is ChapterWID && actionRequest.downloadObject.addQueue) {
             QueueManager.add(Uri.parse(option.url), false, actionRequest.item)
@@ -450,6 +454,8 @@ object FileActions {
                                     .setData(Uri.parse(option.url))
                                     .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                                     .putExtra("headers", option.headers?.headers?.toArray())
+                                    .putExtra("server_name", serverName)
+                                    .putExtra("server_lang", selectedLang)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW)
@@ -465,6 +471,8 @@ object FileActions {
                                 .setData(Uri.parse(option.url))
                                 .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                                 .putExtra("headers", option.headers?.headers?.toArray())
+                                .putExtra("server_name", serverName)
+                                .putExtra("server_lang", selectedLang)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }
         }
