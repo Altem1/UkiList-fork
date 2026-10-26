@@ -1,18 +1,85 @@
-![](https://github.com/jordyamc/UKIKU/blob/master/web/img/UKIKU%20Facebook.png)
+# UKIKU AniList (UkiList)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4f8228880e0a4d3da8ee1c861801e5bf)](https://app.codacy.com/app/jordyamc/UKIKU?utm_source=github.com&utm_medium=referral&utm_content=jordyamc/UKIKU&utm_campaign=Badge_Grade_Dashboard)
-[![GitHub last commit](https://img.shields.io/github/last-commit/google/skia.svg)](https://github.com/jordyamc/UKIKU/commits/master)
-[![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/jordyamc/UKIKU/blob/master/LICENSE)
-[![GitHub forks](https://img.shields.io/github/forks/jordyamc/UKIKU.svg)](https://github.com/jordyamc/UKIKU/network/members)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Fork de UKIKU](https://img.shields.io/badge/Fork%20de-jordyamc%2FUKIKU-orange)](https://github.com/jordyamc/UKIKU)
+[![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 
-## ¿Qué es UKIKU?
+**UKIKU AniList** (`com.altem1.ukilist`) es un fork no oficial de [UKIKU](https://github.com/jordyamc/UKIKU) enfocado en la integración y sincronización automática con [AniList](https://anilist.co), libre de anuncios.
 
-Es una app derivada de mi antiguo proyecto [Animeflv App](https://github.com/jordyamc/Animeflv), tiene casi las mismas funciones, pero hecha desde cero para dispositivos con Android 5 o superior, esta pensada para tener mejor rendimiento y optimización, así como menor tamaño de [APK](https://github.com/jordyamc/UKIKU/raw/master/app/release/app-release.apk) (~6MB)
+---
 
-## ¿Por que un proyecto tan grande no tiene mucha publicidad y es código abierto?
+## ✨ Novedades respecto a UKIKU original
 
-Soy un programador por hobby, no tengo experiencia profesional en la programación, pero aun así decidí aprender por mi cuenta, mis proyectos están hechos con el propósito de aprender a programar en el camino, aun con todo ese tiempo invertido quise que mis apps sean hechas por un fan para fans de anime, me gusta que la comunidad se apoye entre si, así que decidí que los propios usuarios elijan como y cuando apoyar a la app, pero aun así las donaciones son muy bien recibidas ;)
+- **Sincronización con AniList (OAuth2)**:
+  - **Importación de biblioteca**: importa tu lista de animes desde AniList y marca automáticamente los episodios vistos en la base de datos local.
+  - **Scrobble automático**: registra en AniList cada episodio que terminas de ver en el reproductor (al alcanzar el 85 % o finalizar el video) mediante `WorkManager`.
+  - **Sincronización manual por episodio**: marca o desmarca episodios individualmente con indicador de estado de sincronización (nube por capítulo).
+  - **Gestor de excepciones de AniList**: pantalla dedicada para reintentar episodios fallidos, asociar manualmente un anime con su entrada de AniList o descartar errores.
+- **Sin publicidad ni rastreadores de anuncios**: se eliminaron las integraciones de anuncios y Dropbox del proyecto original.
+- **Compilación autónoma**:
+  - Módulo `:dtpv` ([DoubleTapPlayerView](https://github.com/vkay94/DoubleTapPlayerView)) integrado localmente y portado a **AndroidX Media3**.
+  - Valores de Firebase Remote Config servidos localmente sin depender del backend original.
+  - Identificador de aplicación independiente (`com.altem1.ukilist`) para poder instalarlo junto con UKIKU original sin conflicto de firmas ni paquetes.
 
-## ¿Como puedo modificar este proyecto?
+---
 
-En la [wiki](https://github.com/jordyamc/UKIKU/wiki) de éste repositorio encontrarás los pasos para hacerlo!
+## 🛠️ Compilación
+
+1. Clona este repositorio:
+   ```bash
+   git clone https://github.com/Altem1/UkiList.git
+   cd UkiList
+   ```
+2. Crea un cliente de API en [AniList Developer Settings](https://anilist.co/settings/developer) con el **Redirect URL**:
+   ```
+   ukiku://anilist-callback
+   ```
+3. En la raíz del proyecto, asegúrate de definir tu `ANILIST_CLIENT_ID` en `local.properties`:
+   ```properties
+   ANILIST_CLIENT_ID=tu_client_id
+   ```
+4. Compila el APK con Gradle (requiere JDK 17):
+   ```bash
+   ./gradlew assembleDebug
+   ```
+
+---
+
+## 🙏 Créditos y agradecimientos
+
+Este proyecto existe gracias al trabajo de código abierto de sus autores originales:
+
+- **[UKIKU](https://github.com/jordyamc/UKIKU)** — Proyecto original creado y desarrollado por **Jordy Alexis Mendoza Caballero** ([@jordyamc](https://github.com/jordyamc)).
+- **[DoubleTapPlayerView](https://github.com/vkay94/DoubleTapPlayerView)** — Librería de gestos de doble toque creada por **Viktor Krez** ([@vkay94](https://github.com/vkay94)), incluida en este repositorio bajo el módulo `:dtpv` (portada a Media3).
+- **[AniList](https://anilist.co)** — Sincronización y metadatos de seguimiento proporcionados a través de la [API pública GraphQL de AniList](https://github.com/AniList/ApiV2-GraphQL-Docs).
+- **Fork (`UKIKU AniList` / `UkiList`)** — Mantenido por **Altem01** ([@Altem1](https://github.com/Altem1)).
+
+---
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo la **Licencia MIT**, conservando íntegros los derechos de autor y avisos de licencia del proyecto original [UKIKU](https://github.com/jordyamc/UKIKU) ([`LICENSE`](LICENSE)):
+
+```text
+MIT License
+
+Copyright (c) 2018 Jordy Alexis Mendoza Caballero
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

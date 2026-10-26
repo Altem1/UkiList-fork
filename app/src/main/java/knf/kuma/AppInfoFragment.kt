@@ -7,7 +7,6 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.danielstone.materialaboutlibrary.ConvenienceBuilder
 import com.danielstone.materialaboutlibrary.MaterialAboutFragment
 import com.danielstone.materialaboutlibrary.items.MaterialAboutActionItem
-import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList
 import knf.kuma.commons.DesignUtils
@@ -21,13 +20,7 @@ class AppInfoFragment : MaterialAboutFragment() {
 
     override fun getMaterialAboutList(context: Context): MaterialAboutList {
         val infoCard = MaterialAboutCard.Builder().outline(isFlat)
-        infoCard.addItem(
-            MaterialAboutTitleItem.Builder()
-                .text("UKIKU AniList")
-                .desc("Fork no oficial de UKIKU con sincronización automática con AniList: importa tu biblioteca y registra cada episodio que terminas. Sin anuncios.")
-                .icon(R.mipmap.ic_launcher)
-                .build()
-        )
+        infoCard.addItem(ConvenienceBuilder.createAppTitleItem(requireContext()))
         infoCard.addItem(
             MaterialAboutActionItem.Builder().text("Versión").subText(BuildConfig.VERSION_NAME)
                 .icon(R.drawable.ic_version).build()
