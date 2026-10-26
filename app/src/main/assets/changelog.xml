@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    <release code="240" version="1.1.0">
+        <change type="new">Ventana de sincronización con AniList: carátula, avance y contador de lo sincronizado y lo que no</change>
+        <change type="new">Rewatch: volver a ver un anime completado lo marca como "Rewatching" en AniList</change>
+        <change type="new">Al abrir un anime se marcan como vistos los episodios que ya viste en AniList</change>
+        <change type="new">Excepciones de AniList en el menú lateral, con "Reintentar todo"</change>
+        <change type="new">Aviso al cambiar el estado de un anime en AniList</change>
+        <change type="new">Autoplay en el reproductor avanzado y favoritos (personajes, staff, estudios) en Perfil</change>
+        <change type="new">Banner del menú lateral con la portada de tu perfil de AniList</change>
+        <change type="change">Nuevo logo del mago y color azul-morado en toda la app</change>
+        <change type="change">Emparejamiento con AniList más tolerante (temporadas, números romanos, sinónimos)</change>
+        <change type="change">Íconos de la app en vez de emojis en Estadísticas, Perfil y Mi lista</change>
+        <change type="fix">La app se cerraba al mostrar algunos avisos (al salir, en el reproductor y al sincronizar)</change>
+    </release>
     <release code="239" version="1.0.0">
         <change type="new">UkiList: fork de UKIKU con sincronización automática con AniList</change>
         <change type="new">Conectar con AniList (OAuth) desde Ajustes &gt; Sincronización</change>
@@ -11,7 +24,7 @@
         <change type="new">Autoplay del siguiente episodio estilo Netflix con cuenta regresiva y cambio de servidor</change>
         <change type="new">Los estados del anime (Viendo, Considerando, etc.) se suben a AniList</change>
         <change type="change">Nuevo nombre e ícono, Acerca de con créditos y licencia MIT de UKIKU</change>
-        <change type="change">Sin anuncios, Noticias ni FAQ en el menú</change>
+        <change type="change">Sin Noticias ni FAQ en el menú</change>
     </release>
     <release code="238" version="6.0.8">
         <change type="fix">Error al mostrar estado y día de emisión en información del anime</change>

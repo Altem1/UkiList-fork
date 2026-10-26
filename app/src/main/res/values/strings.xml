@@ -310,7 +310,7 @@
     <string name="anilist_sync_dialog_close">Listo</string>
 
     <!-- Acerca de (Fork y créditos) -->
-    <string name="about_description">Fork no oficial de UKIKU con sincronización automática con AniList: importa tu biblioteca y registra cada episodio que terminas. Sin anuncios.</string>
+    <string name="about_description">Fork no oficial de UKIKU con sincronización automática con AniList: importa tu biblioteca y registra cada episodio que terminas.</string>
     <string name="about_version">Versión</string>
     <string name="about_diagnostic">Diagnóstico</string>
     <string name="about_fork">Fork</string>

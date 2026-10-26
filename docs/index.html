@@ -129,6 +129,9 @@
   .slide .tag { align-self: flex-start; font-size: 12px; font-weight: 600; color: var(--cyan); padding: 3px 10px; border-radius: 99px; background: rgba(124,196,255,.12); border: 1px solid var(--border); }
   .slide h3 { font-size: 19px; }
   .slide p { color: var(--muted); font-size: 15px; }
+  .slide .shot { height: 380px; border-radius: 16px; background: rgba(0,0,0,.3); display: grid; place-items: center; overflow: hidden; margin-bottom: 6px; }
+  .slide .shot img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; }
+  .slide.wide .shot img { width: 100%; height: auto; }
   .slide .mock { margin-top: auto; padding: 12px 14px; border-radius: 14px; background: rgba(0,0,0,.25); font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
   .slide .mock b { color: var(--text); font-weight: 600; }
   .car-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 6px; }
@@ -196,14 +199,14 @@
     <p class="sub">Lo que UkiList agrega sobre UKIKU.</p>
     <div class="carousel">
       <div class="track" id="track">
-        <div class="glass slide"><span class="tag">AniList</span><h3>Scrobble automático</h3><p>Al ver el 85% de un episodio se registra en tu lista, aunque cierres el reproductor de golpe.</p><div class="mock"><span>Frieren · Ep 12</span><b>AniList ✓</b></div></div>
-        <div class="glass slide"><span class="tag">AniList</span><h3>Ventana de sincronización</h3><p>Carátula del anime en curso, barra de avance y contador de lo que se sincronizó y lo que no.</p><div class="mock"><span>Anime 236 de 551</span><b>212 ✓ · 23 ✗</b></div></div>
-        <div class="glass slide"><span class="tag">AniList</span><h3>Rewatch</h3><p>Si vuelves a ver un anime completado, se marca como "Rewatching" y suma la repetición al terminar.</p><div class="mock"><span>Estado</span><b>Rewatching · 2ª vez</b></div></div>
-        <div class="glass slide"><span class="tag">Biblioteca</span><h3>Vistos desde AniList</h3><p>Al abrir un anime, los episodios que ya viste en AniList aparecen marcados en la app.</p><div class="mock"><span>Episodios 1–24</span><b>Vistos</b></div></div>
-        <div class="glass slide"><span class="tag">Reproductor</span><h3>Autoplay estilo Netflix</h3><p>Cuenta regresiva para el siguiente episodio; si el servidor no lo tiene, prueba con los demás.</p><div class="mock"><span>Siguiente episodio</span><b>Comienza en 5 s</b></div></div>
-        <div class="glass slide"><span class="tag">Episodios</span><h3>Nube de sincronización</h3><p>Cada episodio muestra si ya está en AniList o si sigue pendiente.</p><div class="mock"><span>Ep 7 · Ep 8</span><b>Subido · Pendiente</b></div></div>
-        <div class="glass slide"><span class="tag">Menú lateral</span><h3>Excepciones</h3><p>Lo que no se pudo subir aparece en el menú: reintenta todo o elige el anime correcto a mano.</p><div class="mock"><span>Excepciones de AniList</span><b>Reintentar todo</b></div></div>
-        <div class="glass slide"><span class="tag">Perfil</span><h3>Perfil y estadísticas</h3><p>Tu perfil, favoritos de anime, personajes, staff y estudios, géneros más vistos y medallas.</p><div class="mock"><span>Días vistos</span><b>Medallas 6 / 11</b></div></div>
+        <div class="glass slide"><div class="shot"><img src="assets/shots/sync.webp" alt="Ventana de sincronización" loading="lazy"></div><span class="tag">AniList</span><h3>Ventana de sincronización</h3><p>Carátula del anime en curso, barra de avance y contador de lo que se sincronizó y lo que no.</p></div>
+        <div class="glass slide wide"><div class="shot"><img src="assets/shots/autoplay.webp" alt="Autoplay estilo Netflix" loading="lazy"></div><span class="tag">Reproductor</span><h3>Autoplay estilo Netflix</h3><p>Al terminar, el episodio se encoge y aparece el siguiente con cuenta regresiva. Si el servidor no lo tiene, prueba con los demás.</p></div>
+        <div class="glass slide"><div class="shot"><img src="assets/shots/episodios.webp" alt="Nube de sincronización" loading="lazy"></div><span class="tag">Episodios</span><h3>Nube de sincronización</h3><p>Los vistos se marcan solos desde tu progreso en AniList, y la nube indica cuáles ya están subidos.</p></div>
+        <div class="glass slide"><div class="shot"><img src="assets/shots/lista.webp" alt="Tu lista dentro de la app" loading="lazy"></div><span class="tag">AniList</span><h3>Tu lista dentro de la app</h3><p>Viendo, pendientes, completados e historial de AniList, con tu progreso en cada anime.</p></div>
+        <div class="glass slide"><div class="shot"><img src="assets/shots/estadisticas.webp" alt="Estadísticas" loading="lazy"></div><span class="tag">Perfil</span><h3>Estadísticas</h3><p>Animes, episodios, días vistos, puntuaciones y géneros más vistos.</p></div>
+        <div class="glass slide"><div class="shot"><img src="assets/shots/perfil.webp" alt="Perfil y medallas" loading="lazy"></div><span class="tag">Perfil</span><h3>Perfil y medallas</h3><p>Tu perfil de AniList, medallas por lo que has visto y logros de la app.</p></div>
+        <div class="glass slide"><div class="shot"><img src="assets/shots/menu.webp" alt="Tu portada de AniList" loading="lazy"></div><span class="tag">Menú lateral</span><h3>Tu portada de AniList</h3><p>El menú lateral muestra tu avatar y la portada de tu perfil, y lo que falle al subir aparece ahí para reintentarlo.</p></div>
+        <div class="glass slide"><div class="shot"><img src="assets/shots/inicio.webp" alt="Todo lo de UKIKU" loading="lazy"></div><span class="tag">Inicio</span><h3>Todo lo de UKIKU</h3><p>Recientes, emisión, catálogo y descargas, con el nuevo color azul.</p></div>
       </div>
       <div class="car-controls">
         <button class="car-btn" id="prev" aria-label="Anterior">‹</button>
