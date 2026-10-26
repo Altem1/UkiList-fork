@@ -279,15 +279,25 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
     }
 
     override fun onNewIntent(intent: Intent) {
+        // El episodio anterior terminó: su posición guardada vuelve a 0.
+        val finished = playerState.apply {
+            title = find<TextView>(R.id.video_title).text.toString()
+            position = 0
+        }
         setIntent(intent)
         releasePlayer()
         isEnding = false
-        playerState.window = C.INDEX_UNSET
-        playerState.position = 0
-        checkPlaylist(intent)
-        initPlayer(intent)
-        setupAutoplay(intent)
         super.onNewIntent(intent)
+        lifecycleScope.launch(Dispatchers.Main) {
+            playerState = withContext(Dispatchers.IO) {
+                CacheDB.INSTANCE.playerStateDAO().set(finished)
+                CacheDB.INSTANCE.playerStateDAO().find(intent.getStringExtra("title") ?: "???")
+                    ?: PlayerState()
+            }
+            checkPlaylist(intent)
+            initPlayer(intent)
+            setupAutoplay(intent)
+        }
     }
 
     override fun onResume() {

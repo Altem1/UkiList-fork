@@ -109,6 +109,7 @@ class NextEpisodeAutoplay(
             val wid = n.chapter.withID(n.anime)
             // Igual que al abrirlo a mano: queda como visto (sin scrobble; eso lo hace el tracker al 85%).
             withContext(Dispatchers.IO) { runCatching { CacheDB.INSTANCE.recordAV1DAO().addChapter(wid.asRecord()) } }
+            knf.kuma.achievements.AchievementManager.onPlayChapter()
             activity.startActivity(
                 Intent(activity, activity.javaClass)
                     .setData(Uri.parse(r.url))
