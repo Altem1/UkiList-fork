@@ -309,4 +309,14 @@
     <string name="about_extras">Extras</string>
     <string name="about_easter_egg">Easter egg</string>
     <string name="about_close">Cerrar</string>
+    <!-- Autoplay y desmarcado -->
+    <string name="next_episode_label">Siguiente episodio</string>
+    <string name="next_episode_title">%1$s - Episodio %2$s</string>
+    <string name="next_episode_countdown">Comienza en %d s</string>
+    <string name="next_episode_searching">Buscando servidor...</string>
+    <string name="next_episode_not_found">No se encontró el siguiente episodio en ningún servidor</string>
+    <string name="next_episode_cancel">Cancelar</string>
+    <string name="next_episode_play">▶  Ver ahora</string>
+    <string name="anilist_unscrobble_planning">AniList: %s vuelto a Planeado</string>
+    <string name="anilist_unscrobble_progress">AniList: %1$s, progreso bajado a episodio %2$d</string>
 </resources>

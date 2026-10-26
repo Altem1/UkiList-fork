@@ -11,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import knf.kuma.App
+import knf.kuma.R
 import knf.kuma.commons.toast
 import knf.kuma.database.CacheDB
 import knf.kuma.pojos.av1.Record
@@ -67,7 +68,8 @@ class AniListUnscrobbleWorker(context: Context, params: WorkerParameters) : Coro
         val status = if (localMax == 0) "PLANNING" else "CURRENT"
         if (!AniListApi.saveProgress(mediaId, localMax, status)) return@withContext Result.retry()
         val name = directory?.name ?: "anime"
-        val msg = if (localMax == 0) "AniList: $name vuelto a Planeado" else "AniList: $name, progreso bajado a episodio $localMax"
+        val msg = if (localMax == 0) applicationContext.getString(R.string.anilist_unscrobble_planning, name)
+            else applicationContext.getString(R.string.anilist_unscrobble_progress, name, localMax)
         withContext(Dispatchers.Main) { msg.toast() }
         Result.success()
     }

@@ -39,7 +39,7 @@
                 android:id="@+id/next_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Siguiente episodio"
+                android:text="@string/next_episode_label"
                 android:textColor="#B3FFFFFF"
                 android:textSize="12sp" />
 
@@ -85,7 +85,7 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:text="Cancelar"
+            android:text="@string/next_episode_cancel"
             android:textColor="#FFFFFF" />
 
         <Button
@@ -96,7 +96,7 @@
             android:background="@drawable/bg_next_episode_button"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:text="▶  Ver ahora"
+            android:text="@string/next_episode_play"
             android:textColor="#000000"
             app:backgroundTint="@null" />
     </LinearLayout>

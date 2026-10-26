@@ -73,7 +73,7 @@ class NextEpisodeAutoplay(
         overlay = view
         view.visibility = View.VISIBLE
         val wid = n.chapter.withID(n.anime)
-        view.findViewById<TextView>(R.id.next_title).text = "${n.anime.name} - Episodio ${n.chapter.number.roundedString()}"
+        view.findViewById<TextView>(R.id.next_title).text = activity.getString(R.string.next_episode_title, n.anime.name, n.chapter.number.roundedString())
         runCatching { view.findViewById<ImageView>(R.id.next_thumb).load(wid.thumbnail) }
         val countdown = view.findViewById<TextView>(R.id.next_countdown)
         val progress = view.findViewById<ProgressBar>(R.id.next_progress)
@@ -86,7 +86,7 @@ class NextEpisodeAutoplay(
         view.findViewById<View>(R.id.next_play).setOnClickListener { play() }
         timer = object : CountDownTimer(COUNTDOWN, 100) {
             override fun onTick(left: Long) {
-                countdown.text = "Comienza en ${(left + 999) / 1000} s"
+                countdown.text = activity.getString(R.string.next_episode_countdown, ((left + 999) / 1000).toInt())
                 progress.progress = ((COUNTDOWN - left) * 1000 / COUNTDOWN).toInt()
             }
 
@@ -97,13 +97,13 @@ class NextEpisodeAutoplay(
     private fun start(n: NextEpisodeResolver.Next, resolved: Deferred<NextEpisodeResolver.Resolved?>, onFinish: () -> Unit) {
         if (launched) return
         launched = true
-        overlay?.findViewById<TextView>(R.id.next_countdown)?.text = "Buscando servidor..."
+        overlay?.findViewById<TextView>(R.id.next_countdown)?.text = activity.getString(R.string.next_episode_searching)
         startJob = scope.launch {
             val r = runCatching { resolved.await() }.getOrNull()
             // Si salió mientras se buscaba servidor, no se reabre el reproductor.
             if (activity.isFinishing || activity.isDestroyed) return@launch
             if (r == null) {
-                "No se encontró el siguiente episodio en ningún servidor".toast()
+                activity.getString(R.string.next_episode_not_found).toast()
                 onFinish()
                 return@launch
             }
