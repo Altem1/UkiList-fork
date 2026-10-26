@@ -500,7 +500,7 @@ class Main : GenericActivity(),
             R.id.drawer_anilist -> knf.kuma.anilist.ui.AniListActivity.open(this)
             R.id.drawer_suggestions -> RecommendActivity.open(this)
             R.id.drawer_news -> MaterialNewsActivity.open(this)
-            R.id.drawer_records -> if (knf.kuma.anilist.AniListAuth.isLoggedIn) knf.kuma.anilist.ui.AniListActivity.open(this, knf.kuma.anilist.ui.AniListActivity.TAB_HISTORY) else RecordActivity.open(this)
+            R.id.drawer_records -> RecordActivity.open(this)
             R.id.drawer_seeing -> SeeingActivity.open(this)
             R.id.drawer_random -> RandomActivity.open(this)
             R.id.drawer_faq -> FaqActivity.open(this)

@@ -16,6 +16,7 @@
     <item
         android:id="@+id/drawer_seeing"
         android:icon="@drawable/ic_seeing_drawer"
+        android:visible="false"
         android:title="Siguiendo"
         app:actionViewClass="android.widget.TextView"/>
     <item
@@ -40,7 +41,7 @@
     <item
         android:id="@+id/drawer_records"
         android:icon="@drawable/ic_record"
-        android:visible="false"
+        android:visible="@bool/showUncensored"
         android:title="Historial"/>
     <item
         android:id="@+id/drawer_random"
