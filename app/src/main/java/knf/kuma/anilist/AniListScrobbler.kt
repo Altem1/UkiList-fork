@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.media3.common.Player
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -94,14 +95,18 @@ class AniListScrobbleWorker(context: Context, params: WorkerParameters) : Corout
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         if (!AniListAuth.isLoggedIn) return@withContext Result.success()
-        val slug = inputData.getString(EXTRA_SLUG) ?: return@withContext Result.failure()
-        val aid = inputData.getInt(EXTRA_AID, 0).takeIf { it != 0 }
-            ?: CacheDB.INSTANCE.directoryDAO().findBySlug(slug)?.aid
-            ?: return@withContext Result.failure()
-        val name = inputData.getString(EXTRA_NAME) ?: return@withContext Result.failure()
+        val slug = inputData.getString(EXTRA_SLUG)
+        val name = inputData.getString(EXTRA_NAME)
         val episode = inputData.getInt(EXTRA_NUMBER, 0)
-        val mediaId = AniListMatcher.findAniListId(aid, slug, name) ?: return@withContext Result.retry()
+        val aid = inputData.getInt(EXTRA_AID, 0).takeIf { it != 0 }
+            ?: slug?.let { CacheDB.INSTANCE.directoryDAO().findBySlug(it)?.aid } ?: 0
+        Log.i("AniList", "Scrobble: aid=$aid slug=$slug name=$name ep=$episode")
+        if (slug == null || name == null || episode <= 0) return@withContext Result.failure()
+        val mediaId = AniListMatcher.findAniListId(aid, slug, name)
+        Log.i("AniList", "Scrobble: mediaId=$mediaId")
+        mediaId ?: return@withContext Result.retry()
         val (current, total) = AniListApi.currentProgress(mediaId) ?: return@withContext Result.retry()
+        Log.i("AniList", "Scrobble: actual=$current total=$total -> $episode")
         if (current != null && current >= episode) return@withContext Result.success()
         val status = if (total != null && episode >= total) "COMPLETED" else "CURRENT"
         if (AniListApi.saveProgress(mediaId, episode, status)) {

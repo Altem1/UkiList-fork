@@ -18,6 +18,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import java.security.KeyStore
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 
 object AniListAuth {
 
@@ -30,7 +34,14 @@ object AniListAuth {
     private const val KEY_USER_ID = "user_id"
     private const val KEY_USER_NAME = "user_name"
 
-    val client: OkHttpClient by lazy { OkHttpClient() }
+    val client: OkHttpClient by lazy {
+        val trustManager = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+            .apply { init(null as KeyStore?) }.trustManagers.filterIsInstance<X509TrustManager>().first()
+        val sslContext = SSLContext.getInstance("TLS").apply { init(null, arrayOf(trustManager), null) }
+        OkHttpClient.Builder()
+            .sslSocketFactory(SniSocketFactory(sslContext.socketFactory), trustManager)
+            .build()
+    }
 
     val userName = MutableLiveData<String?>()
 

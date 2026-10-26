@@ -30,11 +30,11 @@ object AniListMatcher {
 
     /** App → AniList. Usa el título del anime (rōmaji en animeav1) para buscar su Media ID. */
     fun findAniListId(aid: Int, slug: String, name: String): Int? {
-        dao.byAid(aid)?.let { return it.anilistId }
+        if (aid != 0) dao.byAid(aid)?.let { return it.anilistId }
         val results = AniListApi.search(name)
         val n = normalize(name)
         val match = results.firstOrNull { m -> m.titles.any { normalize(it) == n } } ?: results.firstOrNull()
-        return match?.id?.also { dao.add(AniListMapping(aid, slug, it)) }
+        return match?.id?.also { if (aid != 0) dao.add(AniListMapping(aid, slug, it)) }
     }
 
     private suspend fun searchCatalog(query: String): List<DirectoryAV1Min> {
