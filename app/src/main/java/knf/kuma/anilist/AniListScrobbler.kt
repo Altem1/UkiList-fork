@@ -14,6 +14,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import knf.kuma.R
 import knf.kuma.commons.toast
 import knf.kuma.database.CacheDB
 import knf.kuma.pojos.av1.ChapterWID
@@ -108,19 +109,19 @@ class AniListScrobbleWorker(context: Context, params: WorkerParameters) : Corout
             if (runAttemptCount >= MAX_ATTEMPTS) { state(AniListScrobbleState.FAILED, reason); Result.failure() }
             else { state(AniListScrobbleState.PENDING, reason); Result.retry() }
 
-        if (!AniListAuth.isLoggedIn) return@withContext failOrRetry("Sin sesión de AniList")
+        if (!AniListAuth.isLoggedIn) return@withContext failOrRetry(applicationContext.getString(R.string.anilist_reason_no_session))
         Log.i("AniList", "Scrobble: aid=$aid slug=$slug name=$name ep=$episode")
         val forced = inputData.getInt(EXTRA_MEDIA_ID, 0)
         val mediaId = if (forced != 0) forced else when (val r = AniListMatcher.findAniListId(aid, slug, name)) {
             is AniListMatcher.Lookup.Found -> r.mediaId
             AniListMatcher.Lookup.NotFound -> {
-                state(AniListScrobbleState.FAILED, "AniList no encontró \"$name\"")
+                state(AniListScrobbleState.FAILED, applicationContext.getString(R.string.anilist_reason_not_found, name))
                 return@withContext Result.failure()
             }
-            AniListMatcher.Lookup.NetworkError -> return@withContext failOrRetry("No se pudo conectar con AniList")
+            AniListMatcher.Lookup.NetworkError -> return@withContext failOrRetry(applicationContext.getString(R.string.anilist_error_network))
         }
         val (current, total) = AniListApi.currentProgress(mediaId)
-            ?: return@withContext failOrRetry("No se pudo conectar con AniList")
+            ?: return@withContext failOrRetry(applicationContext.getString(R.string.anilist_error_network))
         Log.i("AniList", "Scrobble: mediaId=$mediaId actual=$current total=$total -> $episode")
         if (current != null && current >= episode) {
             state(AniListScrobbleState.SYNCED)
@@ -129,9 +130,9 @@ class AniListScrobbleWorker(context: Context, params: WorkerParameters) : Corout
         val status = if (total != null && episode >= total) "COMPLETED" else "CURRENT"
         if (AniListApi.saveProgress(mediaId, episode, status)) {
             state(AniListScrobbleState.SYNCED)
-            withContext(Dispatchers.Main) { "AniList: $name, episodio $episode registrado".toast() }
+            withContext(Dispatchers.Main) { applicationContext.getString(R.string.anilist_scrobble_registered, name, episode.toString()).toast() }
             Result.success()
-        } else failOrRetry("AniList rechazó la actualización")
+        } else failOrRetry(applicationContext.getString(R.string.anilist_reason_rejected))
     }
 
     companion object {

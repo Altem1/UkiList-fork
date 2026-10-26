@@ -33,7 +33,7 @@ class AniListExceptionsActivity : GenericActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_anilist_exceptions)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.title = "Excepciones de AniList"
+        toolbar.title = getString(R.string.anilist_exceptions_title)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { finish() }
@@ -51,7 +51,12 @@ class AniListExceptionsActivity : GenericActivity() {
     private fun onItem(item: AniListScrobbleState) {
         MaterialDialog(this).safeShow {
             title(text = "${item.name} · Ep ${item.episode}")
-            listItems(items = listOf("Reintentar", "Elegir el anime en AniList", "Descartar")) { _, index, _ ->
+            val options = listOf(
+                getString(R.string.anilist_action_retry),
+                getString(R.string.anilist_action_pick_manual),
+                getString(R.string.anilist_action_dismiss)
+            )
+            listItems(items = options) { _, index, _ ->
                 when (index) {
                     0 -> retry(item)
                     1 -> pickManually(item)
@@ -63,15 +68,15 @@ class AniListExceptionsActivity : GenericActivity() {
 
     private fun retry(item: AniListScrobbleState, mediaId: Int = 0) {
         AniListScrobbleWorker.enqueue(this, item.aid, item.slug, item.name, item.episode, mediaId)
-        "Reintentando...".toast()
+        getString(R.string.anilist_retrying).toast()
     }
 
     private fun pickManually(item: AniListScrobbleState) {
         MaterialDialog(this).safeShow {
-            title(text = "Buscar en AniList")
+            title(res = R.string.anilist_search_title)
             input(prefill = item.name) { _, text -> search(item, text.toString()) }
-            positiveButton(text = "Buscar")
-            negativeButton(text = "Cancelar")
+            positiveButton(res = R.string.anilist_search_action)
+            negativeButton(res = R.string.cancel)
         }
     }
 
@@ -79,10 +84,10 @@ class AniListExceptionsActivity : GenericActivity() {
         lifecycleScope.launch {
             val results = withContext(Dispatchers.IO) { AniListApi.search(query) }
             when {
-                results == null -> "No se pudo conectar con AniList".toast()
-                results.isEmpty() -> "Sin resultados para \"$query\"".toast()
+                results == null -> getString(R.string.anilist_error_network).toast()
+                results.isEmpty() -> getString(R.string.anilist_search_no_results, query).toast()
                 else -> MaterialDialog(this@AniListExceptionsActivity).safeShow {
-                    title(text = "¿Cuál es?")
+                    title(res = R.string.anilist_pick_which)
                     listItems(items = results.map { m -> m.titles.take(2).joinToString(" · ") }) { _, index, _ ->
                         val media = results[index]
                         lifecycleScope.launch(Dispatchers.IO) { AniListMatcher.saveManual(item.aid, item.slug, media.id) }
@@ -112,8 +117,8 @@ class AniListExceptionsActivity : GenericActivity() {
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
             val item = items[position]
-            holder.title.text = "${item.name} · Episodio ${item.episode}"
-            holder.subtitle.text = item.reason ?: "Error desconocido"
+            holder.title.text = getString(R.string.anilist_item_episode_format, item.name, item.episode.toString())
+            holder.subtitle.text = item.reason ?: getString(R.string.anilist_error_unknown)
             holder.itemView.setOnClickListener { onItem(item) }
         }
     }
