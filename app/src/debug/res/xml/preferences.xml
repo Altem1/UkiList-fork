@@ -2,6 +2,13 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <PreferenceCategory android:title="Sincronización">
+
+        <knf.kuma.anilist.AniListPreference
+            android:key="anilist_account"
+            android:persistent="false" />
+    </PreferenceCategory>
+
     <PreferenceCategory
         android:title="Actualizaciones">
 
