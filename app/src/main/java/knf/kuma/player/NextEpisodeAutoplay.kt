@@ -98,8 +98,10 @@ class NextEpisodeAutoplay(
         if (launched) return
         launched = true
         overlay?.findViewById<TextView>(R.id.next_countdown)?.text = "Buscando servidor..."
-        scope.launch {
+        startJob = scope.launch {
             val r = runCatching { resolved.await() }.getOrNull()
+            // Si salió mientras se buscaba servidor, no se reabre el reproductor.
+            if (activity.isFinishing || activity.isDestroyed) return@launch
             if (r == null) {
                 "No se encontró el siguiente episodio en ningún servidor".toast()
                 onFinish()
@@ -123,9 +125,13 @@ class NextEpisodeAutoplay(
         }
     }
 
+    private var startJob: kotlinx.coroutines.Job? = null
+
     fun cancel() {
         timer?.cancel()
         timer = null
+        startJob?.cancel()
+        startJob = null
         removeOverlay()
     }
 

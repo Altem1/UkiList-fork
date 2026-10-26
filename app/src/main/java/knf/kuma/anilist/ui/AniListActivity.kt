@@ -160,7 +160,7 @@ class AniListActivity : GenericActivity() {
         lifecycleScope.launch {
             val mapping = withContext(Dispatchers.IO) { CacheDB.INSTANCE.aniListMappingDAO().byAniList(item.mediaId) }
             if (mapping == null) "${item.title} no está en el catálogo de la app".toast()
-            else knf.kuma.animeinfo.ActivityAnimeMaterial.openByAid(this@AniListActivity, mapping.aid, item.title, null)
+            else knf.kuma.animeinfo.ActivityAnimeMaterial.open(this@AniListActivity, "https://animeav1.com/media/${mapping.slug}")
         }
     }
 

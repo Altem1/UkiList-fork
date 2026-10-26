@@ -103,7 +103,7 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
 
     private fun setupAutoplay(intent: Intent) {
         autoplay?.cancel()
-        autoplay = NextEpisodeAutoplay(this, lifecycleScope, binding.root, intent).also { it.prefetch() }
+        autoplay = NextEpisodeAutoplay(this, lifecycleScope, binding.root, intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -264,7 +264,8 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
     }
 
     override fun onUserLeaveHint() {
-        if (exoPlayer?.playWhenReady == true && packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+        // Con la cuenta regresiva del siguiente episodio en pantalla no se entra a PiP.
+        if (exoPlayer?.playWhenReady == true && !isEnding && packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
             try {
                 val builder = PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
@@ -276,6 +277,15 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
         }
         super.onUserLeaveHint()
         exoPlayer?.playWhenReady = false
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Sin PiP, minimizar o apagar la pantalla cancela el autoplay en vez de cambiar de episodio a escondidas.
+        if (isEnding && !isInPictureInPictureMode && !isFinishing) {
+            autoplay?.cancel()
+            finish()
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
