@@ -50,6 +50,13 @@ class AppInfoFragment : MaterialAboutFragment() {
             )
         )
 
+        forkCard.addItem(
+            ConvenienceBuilder.createWebsiteActionItem(
+                requireContext(), getDrawable(requireContext(), R.drawable.ic_web),
+                getString(R.string.about_website), true, "https://altem1.github.io/UkiList/".toUri()
+            )
+        )
+
         val creditsCard = MaterialAboutCard.Builder().outline(isFlat).title(R.string.about_credits)
         creditsCard.addItem(
             MaterialAboutActionItem.Builder().text(R.string.about_ukiku_credit_title)

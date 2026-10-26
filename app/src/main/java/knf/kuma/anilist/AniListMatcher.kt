@@ -1,6 +1,7 @@
 package knf.kuma.anilist
 
 import android.net.Uri
+import android.util.Log
 import knf.kuma.commons.JsExtractor
 import knf.kuma.database.CacheDB
 import knf.kuma.pojos.av1.DirectoryAV1Min
@@ -14,17 +15,43 @@ object AniListMatcher {
     fun normalize(s: String): String =
         Normalizer.normalize(s, Normalizer.Form.NFD).lowercase().replace(Regex("[^a-z0-9]"), "")
 
-    /** AniList → app. Solo acepta coincidencias exactas de título para no marcar el anime equivocado. */
+    private val ordinal = Regex("(\\d+)(st|nd|rd|th)")
+    private val roman = mapOf("ii" to "2", "iii" to "3", "iv" to "4", "v" to "5")
+
+    /**
+     * Forma canónica más tolerante: quita "season"/"part"/"the", pasa "2nd" y "II" a "2" y descarta signos.
+     * Así "Kimetsu no Yaiba Season 2" y "Kimetsu no Yaiba 2nd Season" coinciden.
+     */
+    fun canonical(s: String): String {
+        val words = Normalizer.normalize(s, Normalizer.Form.NFD).lowercase()
+            .replace(Regex("[^a-z0-9 ]"), " ")
+            .replace(ordinal, "$1")
+            .split(" ").filter { it.isNotBlank() }
+            .map { roman[it] ?: it }
+            .filter { it !in setOf("season", "part", "the", "tv", "cour") }
+        return words.joinToString("")
+    }
+
+    /** AniList → app. Solo acepta coincidencias de título (exactas o canónicas) para no marcar el anime equivocado. */
     suspend fun findAppAnime(media: AniListApi.Media): AniListMapping? {
         dao.byAniList(media.id)?.let { return it }
         val wanted = media.titles.map(::normalize).filter { it.isNotEmpty() }.toSet()
-        for (title in media.titles.take(3)) {
+        val wantedCanon = media.titles.map(::canonical).filter { it.isNotEmpty() }.toSet()
+        // Títulos (rōmaji, inglés, sinónimos) y, de respaldo, la parte antes de ":" del rōmaji.
+        val queries = (media.titles.filter { it.any { c -> c.code < 0x3000 } } +
+                media.titles.first().substringBefore(":").trim())
+            .distinctBy(::normalize).take(5)
+        val seen = mutableListOf<String>()
+        for (title in queries) {
             val candidates = searchCatalog(title)
+            seen += candidates.map { it.name }
             val match = candidates.firstOrNull { normalize(it.name) in wanted }
+                ?: candidates.firstOrNull { canonical(it.name) in wantedCanon }
                 ?: candidates.singleOrNull()?.takeIf { wanted.any { w -> normalize(it.name).startsWith(w) || w.startsWith(normalize(it.name)) } }
             if (match != null)
                 return AniListMapping(match.aid, match.slug, media.id).also { dao.add(it) }
         }
+        Log.i("AniList", "Sin coincidencia: ${media.titles.take(3)} | catálogo: ${seen.distinct().take(6)}")
         return null
     }
 

@@ -315,6 +315,7 @@
     <string name="about_diagnostic">Diagnóstico</string>
     <string name="about_fork">Fork</string>
     <string name="about_fork_code">Código del fork</string>
+    <string name="about_website">Sitio web</string>
     <string name="about_credits">Créditos</string>
     <string name="about_ukiku_credit_title">UKIKU por Jordy Alexis Mendoza Caballero</string>
     <string name="about_ukiku_credit_desc">Proyecto original del que deriva este fork</string>
