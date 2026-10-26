@@ -242,6 +242,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".record.RecordActivity" />
+        <activity android:name="knf.kuma.anilist.ui.AniListActivity" />
         <activity android:name=".seeing.SeeingActivity" />
         <activity android:name=".emision.EmissionActivity" />
         <activity android:name=".explorer.ExplorerActivity" />
