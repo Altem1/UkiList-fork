@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -21,12 +20,14 @@ import com.google.android.material.tabs.TabLayout
 import knf.kuma.R
 import knf.kuma.anilist.AniListApi
 import knf.kuma.anilist.AniListAuth
+import knf.kuma.commons.EAHelper
+import knf.kuma.custom.GenericActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Sección AniList tipo AniHyou: historial y listas del usuario. */
-class AniListActivity : AppCompatActivity() {
+class AniListActivity : GenericActivity() {
 
     private val tabs = listOf(
         "Historial" to null, "Viendo" to "CURRENT", "Pendientes" to "PLANNING",
@@ -39,6 +40,7 @@ class AniListActivity : AppCompatActivity() {
     private lateinit var tabLayout: TabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(EAHelper.getTheme())
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_anilist)
         setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
@@ -49,7 +51,7 @@ class AniListActivity : AppCompatActivity() {
         tabLayout = findViewById(R.id.tabs)
         findViewById<RecyclerView>(R.id.recycler).adapter = adapter
         tabs.forEach { tabLayout.addTab(tabLayout.newTab().setText(it.first)) }
-        tabLayout.getTabAt(intent.getIntExtra(EXTRA_TAB, 1).coerceIn(0, tabs.size - 1))?.select()
+        tabLayout.getTabAt((savedInstanceState?.getInt(EXTRA_TAB) ?: intent.getIntExtra(EXTRA_TAB, 1)).coerceIn(0, tabs.size - 1))?.select()
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) = filter()
             override fun onTabUnselected(tab: TabLayout.Tab) {}
@@ -57,6 +59,11 @@ class AniListActivity : AppCompatActivity() {
         })
         refresh.setOnRefreshListener { load() }
         load()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(EXTRA_TAB, tabLayout.selectedTabPosition.coerceAtLeast(0))
     }
 
     private fun load() {

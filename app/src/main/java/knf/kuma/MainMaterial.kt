@@ -211,15 +211,10 @@ class MainMaterial : GenericActivity(),
             }
             actionInfo.onClick { AppInfoActivityMaterial.open(this@MainMaterial) }
             actionTrophy.onClick { AchievementActivityMaterial.open(this@MainMaterial) }
-            actionLogin.onClick { BackUpActivity.start(this@MainMaterial) }
             actionMap.onClick { EAMapActivity.start(this@MainMaterial) }
             actionMap.visibility = if (EAHelper.phase == 3) View.VISIBLE else View.GONE
-            val backupLocation = navigationView.getHeaderView(0).findViewById<TextView>(R.id.backupLocation)
-            backupLocation.text = when (Backups.type) {
-                Backups.Type.NONE -> "Sin respaldos"
-                Backups.Type.DROPBOX -> "Dropbox"
-                Backups.Type.FIRESTORE -> "Firestore"
-                Backups.Type.LOCAL -> "Local"
+            knf.kuma.anilist.ui.AniListDrawer.bind(this@MainMaterial, navigationView.getHeaderView(0)) {
+                bottomNavigationView.selectedItemId = R.id.action_bottom_settings
             }
             subscribeBadges()
         }
@@ -457,10 +452,11 @@ class MainMaterial : GenericActivity(),
             R.id.action_bottom_settings -> setFragment(BottomPreferencesMaterialFragment.get())
             R.id.drawer_explorer -> ExplorerActivityMaterial.open(this)
             R.id.drawer_emision -> EmissionActivityMaterial.open(this)
-            R.id.drawer_queue -> QueueActivity.open(this)
+            R.id.drawer_queue -> if (knf.kuma.anilist.AniListAuth.isLoggedIn) knf.kuma.anilist.ui.AniListActivity.open(this, knf.kuma.anilist.ui.AniListActivity.TAB_PLANNING) else QueueActivity.open(this)
+            R.id.drawer_anilist -> knf.kuma.anilist.ui.AniListActivity.open(this)
             R.id.drawer_suggestions -> RecommendActivity.open(this)
             R.id.drawer_news -> MaterialNewsActivity.open(this)
-            R.id.drawer_records -> RecordActivity.open(this)
+            R.id.drawer_records -> if (knf.kuma.anilist.AniListAuth.isLoggedIn) knf.kuma.anilist.ui.AniListActivity.open(this, knf.kuma.anilist.ui.AniListActivity.TAB_HISTORY) else RecordActivity.open(this)
             R.id.drawer_seeing -> SeeingActivity.open(this)
             R.id.drawer_random -> RandomActivity.open(this)
             R.id.drawer_faq -> FaqActivityMaterial.open(this)
@@ -553,13 +549,6 @@ class MainMaterial : GenericActivity(),
         invalidateOptionsMenu()
         connectionState.setUp(this, ::onStateDialog)
         lifecycleScope.launch(Dispatchers.Main) {
-            val backupLocation = navigationView.getHeaderView(0).findViewById<TextView>(R.id.backupLocation)
-            backupLocation.text = when (Backups.type) {
-                Backups.Type.NONE -> "Sin respaldos"
-                Backups.Type.DROPBOX -> "Dropbox"
-                Backups.Type.FIRESTORE -> "Firestore"
-                Backups.Type.LOCAL -> "Local"
-            }
         }
         if (isFirst) {
             isFirst = false

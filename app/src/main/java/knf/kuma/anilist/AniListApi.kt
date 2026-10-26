@@ -26,7 +26,7 @@ object AniListApi {
 
     fun userListDetailed(userId: Int): List<ListItem>? {
         val data = AniListAuth.query(
-            "query (\$u: Int) { MediaListCollection(userId: \$u, type: ANIME) { lists { entries { status progress score(format: POINT_10_DECIMAL) updatedAt media { id episodes title { romaji } coverImage { large } } } } } }",
+            "query (\$u: Int) { MediaListCollection(userId: \$u, type: ANIME) { lists { entries { status progress score(format: POINT_10_DECIMAL) updatedAt media { id episodes title { romaji english native } coverImage { large } } } } } }",
             JSONObject().put("u", userId)
         ) ?: return null
         val lists = data.getJSONObject("MediaListCollection").getJSONArray("lists")
@@ -38,7 +38,7 @@ object AniListApi {
                 val m = e.getJSONObject("media")
                 result += ListItem(
                     m.getInt("id"),
-                    m.getJSONObject("title").optString("romaji"),
+                    m.getJSONObject("title").let { t -> listOf("romaji", "english", "native").mapNotNull { k -> t.optString(k).takeIf { it.isNotBlank() && it != "null" } }.firstOrNull() ?: "" },
                     m.optJSONObject("coverImage")?.optString("large"),
                     e.getString("status"),
                     e.optInt("progress"),
