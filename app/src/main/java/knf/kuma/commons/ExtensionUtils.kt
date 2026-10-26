@@ -104,7 +104,7 @@ val <T>LiveData<T>.distinct: LiveData<T>
 
 
 fun getPackage(): String {
-    return if (BuildConfig.BUILD_TYPE == "debug" || BuildConfig.BUILD_TYPE == "release" || BuildConfig.BUILD_TYPE == "playstore" || BuildConfig.BUILD_TYPE == "amazon") "knf.kuma" else "knf.kuma.${BuildConfig.BUILD_TYPE}"
+    return BuildConfig.APPLICATION_ID
 }
 
 val getUpdateDir: String

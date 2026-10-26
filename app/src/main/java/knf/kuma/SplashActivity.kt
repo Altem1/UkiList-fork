@@ -12,7 +12,6 @@ import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import knf.kuma.achievements.AchievementManager
-import knf.kuma.ads.AdsUtils
 import knf.kuma.ads.SubscriptionReceiver
 import knf.kuma.commons.BypassUtil
 import knf.kuma.commons.DesignUtils
@@ -165,16 +164,8 @@ class SplashActivity : GenericActivity() {
                 PrefsUtil.alwaysGenerateUA = false
             installSecurityProvider()
             DesignUtils.change(this@SplashActivity, start = false)
-            AdsUtils.remoteConfigs.ensureInitialized().addOnCompleteListener {
-                var initializated = false
-                AdsUtils.setUp(this@SplashActivity) {
-                    if (!initializated) {
-                        initializated = true
-                        startActivity(Intent(this@SplashActivity, DesignUtils.mainClass))
-                        finish()
-                    }
-                }
-            }
+            startActivity(Intent(this@SplashActivity, DesignUtils.mainClass))
+            finish()
         }
     }
 }

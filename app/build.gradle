@@ -10,7 +10,7 @@ localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 android {
     compileSdk 36
     defaultConfig {
-        applicationId "knf.kuma"
+        applicationId "com.altem1.ukilist"
         minSdkVersion 26
         targetSdkVersion 36
         versionCode 238
@@ -153,7 +153,6 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:34.7.0')
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.google.firebase:firebase-config'
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.android.gms:play-services-auth:20.5.0' //Keep
     //implementation 'com.google.ads.mediation:adcolony:4.4.1.0'

@@ -1,5 +1,6 @@
 package knf.kuma.commons
 
+import knf.kuma.BuildConfig
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
@@ -113,7 +114,7 @@ class SelfServer : Service() {
                 INSTANCE?.stop()
                 if (!isRestart)
                     App.context.sendBroadcast(Intent("knf.cast.stop.foreground").apply {
-                        setPackage("knf.kuma")
+                        setPackage(BuildConfig.APPLICATION_ID)
                     })
             }
         }

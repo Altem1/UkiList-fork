@@ -1,5 +1,6 @@
 package knf.kuma.tv
 
+import knf.kuma.BuildConfig
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
@@ -168,7 +169,7 @@ class TVServersFactory private constructor(
                     val intent = applyExtras(Intent(Intent.ACTION_VIEW))
                     val resolveInfo = App.context.packageManager.queryIntentActivities(intent, 0)
                     val componentsToExclude = resolveInfo.filter {
-                        it.activityInfo.packageName == "knf.kuma"
+                        it.activityInfo.packageName == BuildConfig.APPLICATION_ID
                     }.map {
                         ComponentName(it.activityInfo.packageName, it.activityInfo.name)
                     }
