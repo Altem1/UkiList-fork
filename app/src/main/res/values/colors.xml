@@ -69,7 +69,7 @@
     <color name="textSecondary">#323232</color>
     <color name="textSecondaryDark">#DAFFFFFF</color>
 
-    <color name="colorSplash">#333333</color>
+    <color name="colorSplash">#101840</color>
 
     <color name="dropbox">#007EE5</color>
     <color name="firestore">#FFA000</color>
