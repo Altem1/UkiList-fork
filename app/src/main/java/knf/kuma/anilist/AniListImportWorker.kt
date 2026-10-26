@@ -1,12 +1,18 @@
 package knf.kuma.anilist
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
@@ -30,7 +36,8 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
         val recordDAO = CacheDB.INSTANCE.recordAV1DAO()
         var imported = 0
         var unmatched = 0
-        for (entry in entries) {
+        for ((index, entry) in entries.withIndex()) {
+            progress(index + 1, entries.size, entry.media.titles.first())
             try {
                 val mapping = AniListMatcher.findAppAnime(entry.media)
                 if (mapping == null) {
@@ -60,7 +67,44 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
         Log.i("AniList", "Importados $imported, sin coincidencia $unmatched de ${entries.size}")
         AniListSync.lastImport = "Última importación: $imported de ${entries.size} animes" +
                 if (unmatched > 0) " ($unmatched sin coincidencia)" else ""
+        notify(builder().setContentTitle("Importación de AniList completa")
+            .setContentText(AniListSync.lastImport).setOngoing(false).setAutoCancel(true).build())
         Result.success()
+    }
+
+    private fun builder() = NotificationCompat.Builder(applicationContext, CHANNEL)
+        .setSmallIcon(android.R.drawable.stat_notify_sync)
+        .setOnlyAlertOnce(true)
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+
+    /** Muestra "Importando X de Y" y mantiene el trabajo en primer plano para que Android no lo corte. */
+    private suspend fun progress(current: Int, total: Int, title: String) {
+        val notification = builder()
+            .setContentTitle("Importando de AniList: $current de $total")
+            .setContentText(title)
+            .setProgress(total, current, false)
+            .setOngoing(true)
+            .build()
+        try {
+            setForeground(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                    ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+                else ForegroundInfo(NOTIFICATION_ID, notification)
+            )
+        } catch (e: Exception) {
+            // En segundo plano Android 12+ puede negar el primer plano: seguimos sin él.
+            notify(notification)
+        }
+    }
+
+    private fun notify(notification: android.app.Notification) {
+        val manager = applicationContext.getSystemService(NotificationManager::class.java) ?: return
+        manager.createNotificationChannel(NotificationChannel(CHANNEL, "Sincronización con AniList", NotificationManager.IMPORTANCE_LOW))
+        try {
+            manager.notify(NOTIFICATION_ID, notification)
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
     }
 
     /** Estados de Organizer: 1 viendo, 2 considerando, 3 completado, 4 abandonado, 5 pausado. */
@@ -75,6 +119,8 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
 
     companion object {
         private const val NAME = "anilist-import"
+        private const val CHANNEL = "anilist_sync"
+        private const val NOTIFICATION_ID = 7006
 
         fun runNow(context: Context) {
             WorkManager.getInstance(context).enqueueUniqueWork(

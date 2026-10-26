@@ -13,6 +13,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import knf.kuma.commons.toast
+import knf.kuma.database.CacheDB
 import knf.kuma.pojos.av1.ChapterWID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -43,7 +45,7 @@ class AniListScrobbleTracker(private val context: Context, intent: Intent) : Pla
     private val name = intent.getStringExtra(EXTRA_NAME)
     private val number = intent.getDoubleExtra(EXTRA_NUMBER, 0.0)
 
-    private val enabled get() = aid != 0 && slug != null && name != null && number > 0 &&
+    private val enabled get() = slug != null && name != null && number > 0 &&
             AniListSync.isScrobbleEnabled && AniListAuth.isLoggedIn
 
     private var player: Player? = null
@@ -92,15 +94,20 @@ class AniListScrobbleWorker(context: Context, params: WorkerParameters) : Corout
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         if (!AniListAuth.isLoggedIn) return@withContext Result.success()
-        val aid = inputData.getInt(EXTRA_AID, 0)
         val slug = inputData.getString(EXTRA_SLUG) ?: return@withContext Result.failure()
+        val aid = inputData.getInt(EXTRA_AID, 0).takeIf { it != 0 }
+            ?: CacheDB.INSTANCE.directoryDAO().findBySlug(slug)?.aid
+            ?: return@withContext Result.failure()
         val name = inputData.getString(EXTRA_NAME) ?: return@withContext Result.failure()
         val episode = inputData.getInt(EXTRA_NUMBER, 0)
         val mediaId = AniListMatcher.findAniListId(aid, slug, name) ?: return@withContext Result.retry()
         val (current, total) = AniListApi.currentProgress(mediaId) ?: return@withContext Result.retry()
         if (current != null && current >= episode) return@withContext Result.success()
         val status = if (total != null && episode >= total) "COMPLETED" else "CURRENT"
-        if (AniListApi.saveProgress(mediaId, episode, status)) Result.success() else Result.retry()
+        if (AniListApi.saveProgress(mediaId, episode, status)) {
+            withContext(Dispatchers.Main) { "AniList: $name, episodio $episode registrado".toast() }
+            Result.success()
+        } else Result.retry()
     }
 
     companion object {
@@ -109,7 +116,7 @@ class AniListScrobbleWorker(context: Context, params: WorkerParameters) : Corout
                 .setInputData(workDataOf(EXTRA_AID to aid, EXTRA_SLUG to slug, EXTRA_NAME to name, EXTRA_NUMBER to episode))
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .build()
-            WorkManager.getInstance(context).enqueueUniqueWork("anilist-scrobble-$aid-$episode", ExistingWorkPolicy.KEEP, request)
+            WorkManager.getInstance(context).enqueueUniqueWork("anilist-scrobble-$slug-$episode", ExistingWorkPolicy.KEEP, request)
         }
     }
 }

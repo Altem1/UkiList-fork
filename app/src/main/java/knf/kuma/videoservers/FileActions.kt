@@ -1,5 +1,7 @@
 package knf.kuma.videoservers
 
+import androidx.core.net.toUri
+import knf.kuma.anilist.withScrobble
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -383,6 +385,14 @@ object FileActions {
         }
     }
 
+    /** Episodio que se está reproduciendo, para el scrobble de AniList. aid=0 se resuelve luego por slug. */
+    private fun ActionRequest.scrobbleTarget(): ChapterWID? = when (val i = item) {
+        is ChapterWID -> i
+        is RecentAV1 -> i.asChapter()
+        is Chapter -> url.toUri().pathSegments.getOrNull(1)?.let { slug -> ChapterWID(i.eid, i.number, 0, slug, downloadObject.name) }
+        else -> null
+    }
+
     private fun saveLastServer(name: String) {
         PrefsUtil.lastServer = name
     }
@@ -438,13 +448,13 @@ object FileActions {
                     App.context.startActivity(
                             PrefsUtil.getPlayerIntent()
                                     .setData(Uri.parse(option.url))
-                                    .putExtra("title", actionRequest.downloadObject.title)
+                                    .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                                     .putExtra("headers", option.headers?.headers?.toArray())
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW)
                             .setDataAndType(Uri.parse(option.url), "video/mp4")
-                            .putExtra("title", actionRequest.downloadObject.title)
+                            .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                             .putExtra("headers", option.headers?.headers?.toArray())
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     App.context.startActivity(intent)
@@ -453,7 +463,7 @@ object FileActions {
                 App.context.startActivity(
                         PrefsUtil.getPlayerIntent()
                                 .setData(Uri.parse(option.url))
-                                .putExtra("title", actionRequest.downloadObject.title)
+                                .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                                 .putExtra("headers", option.headers?.headers?.toArray())
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }
