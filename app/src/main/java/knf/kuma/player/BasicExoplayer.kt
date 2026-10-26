@@ -55,6 +55,7 @@ import xdroid.toaster.Toaster
 class BasicExoplayer : AppCompatActivity(), Player.Listener {
     private var exoPlayer: ExoPlayer? = null
     private var scrobbler: AniListScrobbleTracker? = null
+    private var autoplay: NextEpisodeAutoplay? = null
     private var playerState: PlayerState = PlayerState()
     private var isEnding = false
     private var playList: List<QueueObject> = ArrayList()
@@ -96,7 +97,13 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
             }
             checkPlaylist(intent)
             initPlayer(intent)
+            setupAutoplay(intent)
         }
+    }
+
+    private fun setupAutoplay(intent: Intent) {
+        autoplay?.cancel()
+        autoplay = NextEpisodeAutoplay(this, lifecycleScope, binding.root, intent).also { it.prefetch() }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -274,10 +281,12 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
     override fun onNewIntent(intent: Intent) {
         setIntent(intent)
         releasePlayer()
+        isEnding = false
         playerState.window = C.INDEX_UNSET
         playerState.position = 0
         checkPlaylist(intent)
         initPlayer(intent)
+        setupAutoplay(intent)
         super.onNewIntent(intent)
     }
 
@@ -308,6 +317,7 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
     }
 
     override fun onDestroy() {
+        autoplay?.cancel()
         releasePlayer()
         super.onDestroy()
     }
@@ -326,9 +336,13 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
         if (playbackState == Player.STATE_READY) {
             doOnUI { hideUI() }
         }
-        if (playbackState == Player.STATE_ENDED) {
+        if (playbackState == Player.STATE_ENDED && !isEnding) {
             isEnding = true
-            finish()
+            val auto = autoplay
+            if (auto != null && auto.isAvailable && !isInPictureInPictureMode)
+                auto.onEnded { if (!isFinishing) finish() }
+            else
+                finish()
         }
     }
 
