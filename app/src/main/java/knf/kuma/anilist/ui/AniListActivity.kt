@@ -201,8 +201,8 @@ class AniListActivity : GenericActivity() {
             val item = items[position]
             holder.title.text = item.title
             val total = item.episodes?.toString() ?: "?"
-            val score = if (item.score > 0) " · ★ ${item.score}" else ""
-            holder.text.text = "Ep. ${item.progress}/$total$score"
+            val score = if (item.score > 0) " · {star} ${item.score}" else ""
+            holder.text.text = iconText("Ep. ${item.progress}/$total$score", mapOf("star" to R.drawable.ic_score_star), 12f, holder.text.currentTextColor)
             holder.bar.max = item.episodes ?: maxOf(item.progress, 1)
             holder.bar.progress = item.progress
             Glide.with(holder.cover).load(item.cover).into(holder.cover)

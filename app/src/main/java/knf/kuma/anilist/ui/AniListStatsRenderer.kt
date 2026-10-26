@@ -54,6 +54,9 @@ class AniListStatsRenderer(private val activity: AniListActivity, private val co
 
     // ---------- helpers ----------
 
+    /** Texto con {star} cambiado por la estrella de puntuación, del color de acento. */
+    private fun star(s: String, size: Float): CharSequence = ctx.iconText(s, mapOf("star" to R.drawable.ic_score_star), size, accent)
+
     private fun text(s: CharSequence, size: Float = 14f, bold: Boolean = false, secondary: Boolean = false) = TextView(ctx).apply {
         text = s
         setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
@@ -78,7 +81,7 @@ class AniListStatsRenderer(private val activity: AniListActivity, private val co
         return card
     }
 
-    private fun LinearLayout.bar(label: String, value: Int, max: Int, detail: String) {
+    private fun LinearLayout.bar(label: CharSequence, value: Int, max: Int, detail: CharSequence) {
         addView(LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL
             addView(text(label, 13f, bold = true), LinearLayout.LayoutParams(0, -2, 1f))
@@ -123,23 +126,23 @@ class AniListStatsRenderer(private val activity: AniListActivity, private val co
         }
         if (s.scores.isNotEmpty()) card(ctx.getString(R.string.anilist_stat_scores)) {
             val max = s.scores.maxOf { it.count }
-            s.scores.forEach { bar("★ ${it.label}", it.count, max, ctx.getString(R.string.anilist_count_suffix, it.count)) }
+            s.scores.forEach { bar(star("{star} ${it.label}", 13f), it.count, max, ctx.getString(R.string.anilist_count_suffix, it.count)) }
         }
         if (s.genres.isNotEmpty()) card(ctx.getString(R.string.anilist_stat_genres)) {
             val top = s.genres.take(10)
             val max = top.maxOf { it.count }
             top.forEachIndexed { i, g ->
-                val score = if (g.meanScore > 0) " · ★ ${g.meanScore.roundToInt()}" else ""
+                val score = if (g.meanScore > 0) " · {star} ${g.meanScore.roundToInt()}" else ""
                 bar("${i + 1}. ${g.label}", g.count, max,
-                    ctx.getString(R.string.anilist_count_suffix, g.count) + " · " + String.format("%.1f d", g.minutesWatched / 1440.0) + score)
+                    star(ctx.getString(R.string.anilist_count_suffix, g.count) + " · " + String.format("%.1f d", g.minutesWatched / 1440.0) + score, 12f))
             }
         }
         if (s.releaseYears.isNotEmpty()) card(ctx.getString(R.string.anilist_stat_years)) {
             val years = s.releaseYears.sortedByDescending { it.label.toIntOrNull() ?: 0 }.take(15)
             val max = years.maxOf { it.count }
             years.forEach { y ->
-                val score = if (y.meanScore > 0) " · ★ ${y.meanScore.roundToInt()}" else ""
-                bar(y.label, y.count, max, ctx.getString(R.string.anilist_count_suffix, y.count) + score)
+                val score = if (y.meanScore > 0) " · {star} ${y.meanScore.roundToInt()}" else ""
+                bar(y.label, y.count, max, star(ctx.getString(R.string.anilist_count_suffix, y.count) + score, 12f))
             }
         }
         if (s.formats.isNotEmpty()) card(ctx.getString(R.string.anilist_stat_formats)) {
@@ -238,7 +241,7 @@ class AniListStatsRenderer(private val activity: AniListActivity, private val co
                 inner.addView(LinearLayout(ctx).apply {
                     orientation = LinearLayout.VERTICAL
                     setPadding(0, dp(4), 0, dp(4))
-                    addView(text("🏆 ${a.name}", 14f, bold = true))
+                    addView(text(ctx.iconText("{trophy} ${a.name}", mapOf("trophy" to R.drawable.ic_trophy_gold), 14f), 14f, bold = true))
                     if (a.description.isNotBlank()) addView(text(a.description, 12f, secondary = true))
                 })
             }
@@ -309,7 +312,8 @@ class AniListStatsRenderer(private val activity: AniListActivity, private val co
             addView(LinearLayout(ctx).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(8), dp(8), dp(8), dp(8))
-                addView(text((if (unlocked) "🏅 " else "🔒 ") + name, 13f, bold = true).apply { if (!unlocked) setTextColor(secondaryText) })
+                addView(text(ctx.iconText((if (unlocked) "{medal} " else "{lock} ") + name,
+                    mapOf("medal" to R.drawable.ic_trophy_gold, "lock" to R.drawable.ic_locked), 13f, if (unlocked) null else secondaryText), 13f, bold = true).apply { if (!unlocked) setTextColor(secondaryText) })
                 addView(text(desc, 11f, secondary = true))
             })
         }
