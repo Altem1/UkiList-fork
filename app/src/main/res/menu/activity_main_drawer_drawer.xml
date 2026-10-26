@@ -31,7 +31,12 @@
     <item
         android:id="@+id/drawer_news"
         android:icon="@drawable/ic_news"
+        android:visible="false"
         android:title="Noticias"/>
+    <item
+        android:id="@+id/drawer_anilist"
+        android:icon="@drawable/ic_anilist_synced"
+        android:title="AniList"/>
     <item
         android:id="@+id/drawer_records"
         android:icon="@drawable/ic_record"
@@ -44,5 +49,6 @@
     <item
         android:id="@+id/drawer_faq"
         android:icon="@drawable/ic_faq"
+        android:visible="false"
         android:title="FAQ" />
 </menu>

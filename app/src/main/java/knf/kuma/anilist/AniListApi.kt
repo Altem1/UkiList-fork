@@ -12,6 +12,45 @@ object AniListApi {
 
     private val MEDIA_FIELDS = "id episodes synonyms title { romaji english native }"
 
+    /** Elemento de la lista del usuario para la pantalla AniList (portada, progreso, puntuación). */
+    data class ListItem(
+        val mediaId: Int,
+        val title: String,
+        val cover: String?,
+        val status: String,
+        val progress: Int,
+        val episodes: Int?,
+        val score: Double,
+        val updatedAt: Long
+    )
+
+    fun userListDetailed(userId: Int): List<ListItem>? {
+        val data = AniListAuth.query(
+            "query (\$u: Int) { MediaListCollection(userId: \$u, type: ANIME) { lists { entries { status progress score(format: POINT_10_DECIMAL) updatedAt media { id episodes title { romaji } coverImage { large } } } } } }",
+            JSONObject().put("u", userId)
+        ) ?: return null
+        val lists = data.getJSONObject("MediaListCollection").getJSONArray("lists")
+        val result = mutableListOf<ListItem>()
+        for (i in 0 until lists.length()) {
+            val entries = lists.getJSONObject(i).getJSONArray("entries")
+            for (j in 0 until entries.length()) {
+                val e = entries.getJSONObject(j)
+                val m = e.getJSONObject("media")
+                result += ListItem(
+                    m.getInt("id"),
+                    m.getJSONObject("title").optString("romaji"),
+                    m.optJSONObject("coverImage")?.optString("large"),
+                    e.getString("status"),
+                    e.optInt("progress"),
+                    if (m.isNull("episodes")) null else m.getInt("episodes"),
+                    e.optDouble("score", 0.0),
+                    e.optLong("updatedAt")
+                )
+            }
+        }
+        return result.distinctBy { it.mediaId }.sortedByDescending { it.updatedAt }
+    }
+
     private fun JSONObject.toMedia(): Media {
         val title = getJSONObject("title")
         val titles = listOf("romaji", "english", "native").mapNotNull { title.optString(it).takeIf { s -> s.isNotBlank() && s != "null" } } +

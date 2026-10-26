@@ -75,6 +75,7 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/header_avatar"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:paddingTop="4dp"
