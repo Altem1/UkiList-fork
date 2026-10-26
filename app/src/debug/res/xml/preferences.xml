@@ -19,6 +19,12 @@
             android:key="anilist_auto_scrobble"
             android:summary="Al terminar un episodio, actualiza tu progreso en AniList"
             android:title="Sincronizar automáticamente a AniList" />
+
+        <Preference
+            android:key="anilist_exceptions"
+            android:persistent="false"
+            android:title="Excepciones de AniList"
+            android:visible="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

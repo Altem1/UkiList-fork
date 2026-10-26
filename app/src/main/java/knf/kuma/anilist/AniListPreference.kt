@@ -1,6 +1,7 @@
 package knf.kuma.anilist
 
 import android.content.Context
+import android.content.Intent
 import android.util.AttributeSet
 import androidx.lifecycle.Observer
 import androidx.preference.Preference
@@ -8,6 +9,7 @@ import androidx.preference.SwitchPreference
 import com.afollestad.materialdialogs.MaterialDialog
 import knf.kuma.commons.safeShow
 import knf.kuma.commons.toast
+import knf.kuma.database.CacheDB
 
 class AniListPreference @JvmOverloads constructor(
     context: Context,
@@ -21,6 +23,13 @@ class AniListPreference @JvmOverloads constructor(
         scrobbleSwitch?.isEnabled = name != null
     }
 
+    private val failedObserver = Observer<Int> { count ->
+        exceptionsPref?.isVisible = count > 0
+        exceptionsPref?.summary = "$count episodio${if (count == 1) "" else "s"} sin sincronizar"
+    }
+
+    private val failedCount by lazy { CacheDB.INSTANCE.aniListScrobbleDAO().failedCountLive() }
+    private val exceptionsPref get() = preferenceManager?.findPreference<Preference>("anilist_exceptions")
     private val librarySwitch get() = preferenceManager?.findPreference<SwitchPreference>(AniListSync.KEY_LIBRARY)
     private val scrobbleSwitch get() = preferenceManager?.findPreference<SwitchPreference>(AniListSync.KEY_SCROBBLE)
 
@@ -37,11 +46,17 @@ class AniListPreference @JvmOverloads constructor(
                 true
             }
         }
+        exceptionsPref?.setOnPreferenceClickListener {
+            context.startActivity(Intent(context, AniListExceptionsActivity::class.java))
+            true
+        }
+        failedCount.observeForever(failedObserver)
         AniListAuth.userName.observeForever(observer)
     }
 
     override fun onDetached() {
         AniListAuth.userName.removeObserver(observer)
+        failedCount.removeObserver(failedObserver)
         super.onDetached()
     }
 

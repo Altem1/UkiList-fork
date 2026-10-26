@@ -24,6 +24,7 @@ import knf.kuma.retrofit.Repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
+import kotlin.math.floor
 
 /** Importa la lista de AniList a la app: estado de seguimiento + episodios vistos. Nunca borra nada local. */
 class AniListImportWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
@@ -50,9 +51,11 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
                 if (episodes > 0) {
                     val dir = Repository.getDirectory(mapping.slug)
                     if (dir != null) {
-                        dir.chapters.filter { it.number <= episodes }.forEach {
-                            recordDAO.addChapterIgnore(it.asRecord(dir))
-                        }
+                        val seen = dir.chapters.filter { it.number <= episodes }
+                        seen.forEach { recordDAO.addChapterIgnore(it.asRecord(dir)) }
+                        CacheDB.INSTANCE.aniListScrobbleDAO().addIgnore(seen.map {
+                            AniListScrobbleState(dir.slug, floor(it.number).toInt(), dir.aid, dir.name, AniListScrobbleState.SYNCED)
+                        })
                         if (state != null && current?.state != state)
                             organizerDAO.add(dir.asOrganizer(state))
                     }
