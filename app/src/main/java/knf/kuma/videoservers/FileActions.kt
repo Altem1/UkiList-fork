@@ -66,6 +66,8 @@ object FileActions {
     private var snackBarManager: SnackProgressBarManager? = null
     private var servers: MutableList<Server> = ArrayList()
     private var selected = 0
+    /** 0 subtitulado, 1 doblado: se pasa al reproductor para el autoplay del siguiente episodio. */
+    private var selectedLang = 0
 
     fun stream(fragment: Fragment, anime: DirectoryAV1, chapter: Chapter, isQueued: Boolean = false, callback: ActionCallback) {
         try {
@@ -208,6 +210,7 @@ object FileActions {
                         )
                     ).toMutableList()
                     val langSelect: (Int) -> Unit = { index ->
+                        selectedLang = index
                         servers = if (index == 0) {
                             subServers
                         } else {
@@ -450,6 +453,8 @@ object FileActions {
                                     .setData(Uri.parse(option.url))
                                     .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                                     .putExtra("headers", option.headers?.headers?.toArray())
+                                    .putExtra("server_name", servers.getOrNull(selected)?.name)
+                                    .putExtra("server_lang", selectedLang)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW)
@@ -465,6 +470,8 @@ object FileActions {
                                 .setData(Uri.parse(option.url))
                                 .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                                 .putExtra("headers", option.headers?.headers?.toArray())
+                                .putExtra("server_name", servers.getOrNull(selected)?.name)
+                                .putExtra("server_lang", selectedLang)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }
         }
