@@ -22,15 +22,15 @@ class AppInfoFragment : MaterialAboutFragment() {
         val infoCard = MaterialAboutCard.Builder().outline(isFlat)
         infoCard.addItem(ConvenienceBuilder.createAppTitleItem(requireContext()))
         infoCard.addItem(
-            MaterialAboutActionItem.Builder().text("Versión").subText(BuildConfig.VERSION_NAME)
+            MaterialAboutActionItem.Builder().text(R.string.about_version).subText(BuildConfig.VERSION_NAME)
                 .icon(R.drawable.ic_version).build()
         )
         infoCard.addItem(
-            MaterialAboutActionItem.Builder().text("Diagnóstico").icon(R.drawable.ic_diagnostic)
+            MaterialAboutActionItem.Builder().text(R.string.about_diagnostic).icon(R.drawable.ic_diagnostic)
                 .setOnClickAction { openDiagnostic() }.build()
         )
 
-        val forkCard = MaterialAboutCard.Builder().outline(isFlat).title("Fork")
+        val forkCard = MaterialAboutCard.Builder().outline(isFlat).title(R.string.about_fork)
         forkCard.addItem(
             ConvenienceBuilder.createWebsiteActionItem(
                 requireContext(), getDrawable(requireContext(), R.drawable.ic_author),
@@ -40,41 +40,41 @@ class AppInfoFragment : MaterialAboutFragment() {
         forkCard.addItem(
             ConvenienceBuilder.createWebsiteActionItem(
                 requireContext(), getDrawable(requireContext(), R.drawable.ic_github),
-                "Código del fork", true, "https://github.com/Altem1/UkiList".toUri()
+                getString(R.string.about_fork_code), true, "https://github.com/Altem1/UkiList".toUri()
             )
         )
 
-        val creditsCard = MaterialAboutCard.Builder().outline(isFlat).title("Créditos")
+        val creditsCard = MaterialAboutCard.Builder().outline(isFlat).title(R.string.about_credits)
         creditsCard.addItem(
-            MaterialAboutActionItem.Builder().text("UKIKU por Jordy Alexis Mendoza Caballero")
-                .subText("Proyecto original del que deriva este fork")
+            MaterialAboutActionItem.Builder().text(R.string.about_ukiku_credit_title)
+                .subText(R.string.about_ukiku_credit_desc)
                 .icon(R.drawable.ic_github)
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(requireContext(), "https://github.com/jordyamc/UKIKU".toUri()))
                 .build()
         )
         creditsCard.addItem(
-            MaterialAboutActionItem.Builder().text("Licencia MIT de UKIKU")
+            MaterialAboutActionItem.Builder().text(R.string.about_ukiku_license_title)
                 .subText("Copyright (c) 2018 Jordy Alexis Mendoza Caballero")
                 .icon(R.drawable.ic_changelog_get)
                 .setOnClickAction { showLicense("UKIKU", "2018 Jordy Alexis Mendoza Caballero") }.build()
         )
         creditsCard.addItem(
-            MaterialAboutActionItem.Builder().text("DoubleTapPlayerView por Viktor Krez")
-                .subText("Copyright (c) 2019 Viktor Krez · MIT · incluido como módulo :dtpv")
+            MaterialAboutActionItem.Builder().text(R.string.about_dtpv_credit_title)
+                .subText(R.string.about_dtpv_credit_desc)
                 .icon(R.drawable.ic_changelog_get)
                 .setOnClickAction { showLicense("DoubleTapPlayerView", "2019 Viktor Krez") }.build()
         )
         creditsCard.addItem(
-            MaterialAboutActionItem.Builder().text("AniList")
-                .subText("Datos y sincronización vía la API pública de AniList")
+            MaterialAboutActionItem.Builder().text(R.string.anilist)
+                .subText(R.string.about_anilist_desc)
                 .icon(R.drawable.ic_web)
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(requireContext(), "https://anilist.co".toUri()))
                 .build()
         )
 
-        val extraCard = MaterialAboutCard.Builder().outline(isFlat).title("Extras")
+        val extraCard = MaterialAboutCard.Builder().outline(isFlat).title(R.string.about_extras)
         extraCard.addItem(
-            MaterialAboutActionItem.Builder().text("Easter egg").icon(R.drawable.ic_egg)
+            MaterialAboutActionItem.Builder().text(R.string.about_easter_egg).icon(R.drawable.ic_egg)
                 .setOnClickAction { EAUnlockActivity.start(requireContext()) }.build()
         )
 
@@ -90,7 +90,7 @@ class AppInfoFragment : MaterialAboutFragment() {
         MaterialDialog(requireContext()).safeShow {
             title(text = "$project · Licencia MIT")
             message(text = mitLicense(copyright))
-            positiveButton(text = "Cerrar")
+            positiveButton(res = R.string.about_close)
         }
     }
 
@@ -109,5 +109,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             DiagnosticMaterial.open(requireContext())
         else
             Diagnostic.open(requireContext())
+    }
+
+    companion object {
+        fun get(): AppInfoFragment = AppInfoFragment()
     }
 }

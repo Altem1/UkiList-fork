@@ -242,4 +242,71 @@
     </string-array>
     <string name="title_activity_eam">Mapa</string>
     <string name="title_activity_eamap">Map</string>
+
+    <!-- Sincronización y AniList -->
+    <string name="category_sync">Sincronización</string>
+    <string name="pref_sync_library_title">Sincronizar biblioteca dentro de la app</string>
+    <string name="pref_sync_library_summary">Marca como vistos en la app los episodios de tu lista de AniList</string>
+    <string name="pref_auto_scrobble_title">Sincronizar automáticamente a AniList</string>
+    <string name="pref_auto_scrobble_summary">Al terminar un episodio, actualiza tu progreso en AniList</string>
+    <string name="pref_exceptions_title">Excepciones de AniList</string>
+
+    <string name="anilist">AniList</string>
+    <string name="anilist_connect">Conectar con AniList</string>
+    <string name="anilist_connect_summary">Sincroniza tu progreso automáticamente</string>
+    <string name="anilist_connected_as">Conectado como %s</string>
+    <string name="anilist_unsynced_single">%d episodio sin sincronizar</string>
+    <string name="anilist_unsynced_plural">%d episodios sin sincronizar</string>
+    <plurals name="anilist_unsynced_episodes">
+        <item quantity="one">%d episodio sin sincronizar</item>
+        <item quantity="other">%d episodios sin sincronizar</item>
+    </plurals>
+    <string name="anilist_importing_toast">Importando tu lista de AniList…</string>
+    <string name="anilist_missing_client_id">Falta ANILIST_CLIENT_ID en local.properties</string>
+    <string name="anilist_disconnect_dialog_title">¿Desconectar tu cuenta de AniList?</string>
+    <string name="anilist_disconnect_action">Desconectar</string>
+    <string name="cancel">Cancelar</string>
+
+    <!-- Excepciones de AniList -->
+    <string name="anilist_exceptions_title">Excepciones de AniList</string>
+    <string name="anilist_exceptions_empty">Todo está sincronizado con AniList</string>
+    <string name="anilist_action_retry">Reintentar</string>
+    <string name="anilist_action_pick_manual">Elegir el anime en AniList</string>
+    <string name="anilist_action_dismiss">Descartar</string>
+    <string name="anilist_retrying">Reintentando…</string>
+    <string name="anilist_search_title">Buscar en AniList</string>
+    <string name="anilist_search_action">Buscar</string>
+    <string name="anilist_error_network">No se pudo conectar con AniList</string>
+    <string name="anilist_search_no_results">Sin resultados para \"%s\"</string>
+    <string name="anilist_pick_which">¿Cuál es?</string>
+    <string name="anilist_item_episode_format">%1$s · Episodio %2$s</string>
+    <string name="anilist_error_unknown">Error desconocido</string>
+
+    <!-- Notificaciones y workers de AniList -->
+    <string name="anilist_channel_name">Sincronización con AniList</string>
+    <string name="anilist_import_complete_title">Importación de AniList completa</string>
+    <string name="anilist_import_progress_title">Importando de AniList: %1$d de %2$d</string>
+    <string name="anilist_import_summary">Última importación: %1$d de %2$d animes</string>
+    <string name="anilist_import_unmatched">(%d sin coincidencia)</string>
+    <string name="anilist_reason_no_session">Sin sesión de AniList</string>
+    <string name="anilist_reason_not_found">AniList no encontró \"%s\"</string>
+    <string name="anilist_reason_rejected">AniList rechazó la actualización</string>
+    <string name="anilist_scrobble_registered">AniList: %1$s, episodio %2$s registrado</string>
+
+    <!-- Acerca de (Fork y créditos) -->
+    <string name="about_description">Fork no oficial de UKIKU con sincronización automática con AniList: importa tu biblioteca y registra cada episodio que terminas. Sin anuncios.</string>
+    <string name="about_version">Versión</string>
+    <string name="about_diagnostic">Diagnóstico</string>
+    <string name="about_fork">Fork</string>
+    <string name="about_fork_code">Código del fork</string>
+    <string name="about_credits">Créditos</string>
+    <string name="about_ukiku_credit_title">UKIKU por Jordy Alexis Mendoza Caballero</string>
+    <string name="about_ukiku_credit_desc">Proyecto original del que deriva este fork</string>
+    <string name="about_ukiku_license_title">Licencia MIT de UKIKU</string>
+    <string name="about_dtpv_credit_title">DoubleTapPlayerView por Viktor Krez</string>
+    <string name="about_dtpv_credit_desc">Copyright (c) 2019 Viktor Krez · MIT · incluido como módulo :dtpv</string>
+    <string name="about_anilist_desc">Datos y sincronización vía la API pública de AniList</string>
+    <string name="about_extras">Extras</string>
+    <string name="about_easter_egg">Easter egg</string>
+    <string name="about_close">Cerrar</string>
 </resources>

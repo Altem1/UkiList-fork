@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Sincronización">
+    <PreferenceCategory android:title="@string/category_sync">
 
         <knf.kuma.anilist.AniListPreference
             android:key="anilist_account"
@@ -12,19 +12,19 @@
         <SwitchPreference
             android:defaultValue="false"
             android:key="anilist_sync_library"
-            android:summary="Marca como vistos en la app los episodios de tu lista de AniList"
-            android:title="Sincronizar biblioteca dentro de la app" />
+            android:summary="@string/pref_sync_library_summary"
+            android:title="@string/pref_sync_library_title" />
 
         <SwitchPreference
             android:defaultValue="false"
             android:key="anilist_auto_scrobble"
-            android:summary="Al terminar un episodio, actualiza tu progreso en AniList"
-            android:title="Sincronizar automáticamente a AniList" />
+            android:summary="@string/pref_auto_scrobble_summary"
+            android:title="@string/pref_auto_scrobble_title" />
 
         <Preference
             android:key="anilist_exceptions"
             android:persistent="false"
-            android:title="Excepciones de AniList"
+            android:title="@string/pref_exceptions_title"
             android:visible="false" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Actualizaciones">

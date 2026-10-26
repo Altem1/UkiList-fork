@@ -18,6 +18,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import knf.kuma.R
 import knf.kuma.database.CacheDB
 import knf.kuma.pojos.av1.Organizer
 import knf.kuma.retrofit.Repository
@@ -68,9 +69,9 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
             }
         }
         Log.i("AniList", "Importados $imported, sin coincidencia $unmatched de ${entries.size}")
-        AniListSync.lastImport = "Última importación: $imported de ${entries.size} animes" +
-                if (unmatched > 0) " ($unmatched sin coincidencia)" else ""
-        notify(builder().setContentTitle("Importación de AniList completa")
+        val unmatchedStr = if (unmatched > 0) " " + applicationContext.getString(R.string.anilist_import_unmatched, unmatched) else ""
+        AniListSync.lastImport = applicationContext.getString(R.string.anilist_import_summary, imported, entries.size) + unmatchedStr
+        notify(builder().setContentTitle(applicationContext.getString(R.string.anilist_import_complete_title))
             .setContentText(AniListSync.lastImport).setOngoing(false).setAutoCancel(true).build())
         Result.success()
     }
@@ -83,7 +84,7 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
     /** Muestra "Importando X de Y" y mantiene el trabajo en primer plano para que Android no lo corte. */
     private suspend fun progress(current: Int, total: Int, title: String) {
         val notification = builder()
-            .setContentTitle("Importando de AniList: $current de $total")
+            .setContentTitle(applicationContext.getString(R.string.anilist_import_progress_title, current, total))
             .setContentText(title)
             .setProgress(total, current, false)
             .setOngoing(true)
@@ -102,7 +103,7 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
 
     private fun notify(notification: android.app.Notification) {
         val manager = applicationContext.getSystemService(NotificationManager::class.java) ?: return
-        manager.createNotificationChannel(NotificationChannel(CHANNEL, "Sincronización con AniList", NotificationManager.IMPORTANCE_LOW))
+        manager.createNotificationChannel(NotificationChannel(CHANNEL, applicationContext.getString(R.string.anilist_channel_name), NotificationManager.IMPORTANCE_LOW))
         try {
             manager.notify(NOTIFICATION_ID, notification)
         } catch (e: SecurityException) {

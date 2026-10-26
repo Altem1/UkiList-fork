@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import com.afollestad.materialdialogs.MaterialDialog
+import knf.kuma.R
 import knf.kuma.commons.safeShow
 import knf.kuma.commons.toast
 import knf.kuma.database.CacheDB
@@ -17,15 +18,15 @@ class AniListPreference @JvmOverloads constructor(
 ) : Preference(context, attrs) {
 
     private val observer = Observer<String?> { name ->
-        title = if (name == null) "Conectar con AniList" else "AniList"
-        summary = if (name == null) "Sincroniza tu progreso automáticamente" else "Conectado como $name"
+        title = if (name == null) context.getString(R.string.anilist_connect) else context.getString(R.string.anilist)
+        summary = if (name == null) context.getString(R.string.anilist_connect_summary) else context.getString(R.string.anilist_connected_as, name)
         librarySwitch?.isEnabled = name != null
         scrobbleSwitch?.isEnabled = name != null
     }
 
     private val failedObserver = Observer<Int> { count ->
         exceptionsPref?.isVisible = count > 0
-        exceptionsPref?.summary = "$count episodio${if (count == 1) "" else "s"} sin sincronizar"
+        exceptionsPref?.summary = context.resources.getQuantityString(R.plurals.anilist_unsynced_episodes, count, count)
     }
 
     private val failedCount by lazy { CacheDB.INSTANCE.aniListScrobbleDAO().failedCountLive() }
@@ -41,7 +42,7 @@ class AniListPreference @JvmOverloads constructor(
                 if (newValue == true) {
                     AniListImportWorker.runNow(context)
                     AniListImportWorker.schedule(context)
-                    "Importando tu lista de AniList...".toast()
+                    context.getString(R.string.anilist_importing_toast).toast()
                 } else AniListImportWorker.cancel(context)
                 true
             }
@@ -62,11 +63,11 @@ class AniListPreference @JvmOverloads constructor(
 
     override fun onClick() {
         when {
-            !AniListAuth.isConfigured -> "Falta ANILIST_CLIENT_ID en local.properties".toast()
+            !AniListAuth.isConfigured -> context.getString(R.string.anilist_missing_client_id).toast()
             AniListAuth.isLoggedIn -> MaterialDialog(context).safeShow {
-                message(text = "¿Desconectar tu cuenta de AniList?")
-                positiveButton(text = "Desconectar") { AniListAuth.logout() }
-                negativeButton(text = "Cancelar")
+                message(res = R.string.anilist_disconnect_dialog_title)
+                positiveButton(res = R.string.anilist_disconnect_action) { AniListAuth.logout() }
+                negativeButton(res = R.string.cancel)
             }
             else -> AniListAuth.launchLogin(context)
         }
