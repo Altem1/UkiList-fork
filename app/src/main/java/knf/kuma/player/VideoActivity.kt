@@ -53,6 +53,8 @@ class VideoActivity : AppCompatActivity(), PlayerHolder.PlayerCallback {
     var playList: List<QueueObject> = emptyList()
 
     private var scrobbler: AniListScrobbleTracker? = null
+    private var autoplay: NextEpisodeAutoplay? = null
+    private var isEnding = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(EAHelper.getTheme())
@@ -104,6 +106,8 @@ class VideoActivity : AppCompatActivity(), PlayerHolder.PlayerCallback {
                     binding.player.useController = false
                 createPlayer()
                 playerHolder.start()
+                autoplay?.cancel()
+                autoplay = NextEpisodeAutoplay(this@VideoActivity, lifecycleScope, binding.root as android.view.ViewGroup, intent)
             }
         }
     }
@@ -182,7 +186,29 @@ class VideoActivity : AppCompatActivity(), PlayerHolder.PlayerCallback {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        // Igual que en el reproductor básico: sin PiP, salir cancela el autoplay.
+        if (isEnding && !isInPictureInPictureMode && !isFinishing) {
+            autoplay?.cancel()
+            finish()
+        }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        // Autoplay: singleTask recibe el siguiente episodio aquí; se reinicia el reproductor con él.
+        super.onNewIntent(intent)
+        setIntent(intent)
+        autoplay?.cancel()
+        isEnding = false
+        stopPlayer()
+        releasePlayer()
+        if (::mediaSession.isInitialized) mediaSession.release()
+        initPlayer(null)
+    }
+
     override fun onDestroy() {
+        autoplay?.cancel()
         super.onDestroy()
         stopPlayer()
         releasePlayer()
@@ -316,6 +342,12 @@ class VideoActivity : AppCompatActivity(), PlayerHolder.PlayerCallback {
     override fun onPlayerStateChanged(state: Int) {
         if (state == Player.STATE_READY)
             doOnUI { hideUI() }
+        if (state == Player.STATE_ENDED && !isEnding) {
+            isEnding = true
+            val auto = autoplay
+            if (auto != null && auto.isAvailable && !isInPictureInPictureMode)
+                lifecycleScope.launch(Dispatchers.Main) { auto.onEnded { if (!isFinishing) finish() } }
+        }
     }
 
 

@@ -123,6 +123,9 @@ object AniListApi {
 
     data class FavouriteAnime(val mediaId: Int, val title: String, val cover: String?)
 
+    /** Personaje, staff o estudio favorito: se abre en la web de AniList. */
+    data class FavouriteItem(val name: String, val image: String?, val url: String?)
+
     data class UserProfile(
         val id: Int,
         val name: String,
@@ -132,6 +135,9 @@ object AniListApi {
         val createdAt: Long,
         val siteUrl: String?,
         val favourites: List<FavouriteAnime>,
+        val favCharacters: List<FavouriteItem>,
+        val favStaff: List<FavouriteItem>,
+        val favStudios: List<FavouriteItem>,
         val stats: AnimeStatistics
     )
 
@@ -151,7 +157,10 @@ object AniListApi {
         val stat = "count minutesWatched meanScore"
         val data = AniListAuth.query(
             "query (\$u: Int) { User(id: \$u) { id name about(asHtml: false) avatar { large } bannerImage createdAt siteUrl " +
-                    "favourites { anime(page: 1, perPage: 15) { nodes { id title { romaji english native } coverImage { large } } } } " +
+                    "favourites { anime(page: 1, perPage: 15) { nodes { id title { romaji english native } coverImage { large } } } " +
+                    "characters(page: 1, perPage: 15) { nodes { name { userPreferred } image { large } siteUrl } } " +
+                    "staff(page: 1, perPage: 15) { nodes { name { userPreferred } image { large } siteUrl } } " +
+                    "studios(page: 1, perPage: 15) { nodes { name siteUrl } } } " +
                     "statistics { anime { count episodesWatched minutesWatched meanScore standardDeviation " +
                     "statuses { status $stat } formats { format $stat } scores(sort: MEAN_SCORE) { score count minutesWatched } " +
                     "genres(limit: 15, sort: COUNT_DESC) { genre $stat } releaseYears(sort: ID_DESC) { releaseYear $stat } } } } }",
@@ -164,9 +173,18 @@ object AniListApi {
             val t = m.optJSONObject("title") ?: JSONObject()
             FavouriteAnime(m.optInt("id"), listOf("romaji", "english", "native").firstNotNullOfOrNull { t.str(it) } ?: "", m.optJSONObject("coverImage")?.str("large"))
         }
+        val favRoot = data.optJSONObject("favourites")
+        fun people(key: String) = favRoot?.optJSONObject(key)?.optJSONArray("nodes").let { arr ->
+            (0 until (arr?.length() ?: 0)).mapNotNull { i ->
+                val n = arr!!.optJSONObject(i) ?: return@mapNotNull null
+                val name = n.optJSONObject("name")?.str("userPreferred") ?: n.str("name") ?: return@mapNotNull null
+                FavouriteItem(name, n.optJSONObject("image")?.str("large"), n.str("siteUrl"))
+            }
+        }
         return UserProfile(
             data.optInt("id"), data.str("name") ?: "", data.str("about"), data.optJSONObject("avatar")?.str("large"),
             data.str("bannerImage"), data.optLong("createdAt"), data.str("siteUrl"), favs,
+            people("characters"), people("staff"), people("studios"),
             AnimeStatistics(
                 a.optInt("count"), a.optInt("episodesWatched"), a.optInt("minutesWatched"),
                 a.optDouble("meanScore", 0.0).takeIf { !it.isNaN() } ?: 0.0,

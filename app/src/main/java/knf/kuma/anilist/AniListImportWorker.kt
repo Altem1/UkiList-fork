@@ -76,7 +76,13 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
         Result.success()
     }
 
-    private fun builder() = NotificationCompat.Builder(applicationContext, CHANNEL)
+    private fun ensureChannel() {
+        applicationContext.getSystemService(NotificationManager::class.java)?.createNotificationChannel(
+            NotificationChannel(CHANNEL, applicationContext.getString(R.string.anilist_channel_name), NotificationManager.IMPORTANCE_LOW))
+    }
+
+    // El canal debe existir antes de setForeground; si no, Android mata la app ("Bad notification for startForeground").
+    private fun builder() = ensureChannel().let { NotificationCompat.Builder(applicationContext, CHANNEL) }
         .setSmallIcon(android.R.drawable.stat_notify_sync)
         .setOnlyAlertOnce(true)
         .setPriority(NotificationCompat.PRIORITY_LOW)

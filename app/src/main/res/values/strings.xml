@@ -343,6 +343,9 @@
     <string name="anilist_local_achievements">Logros de la app</string>
     <string name="anilist_no_achievements">Aún no has desbloqueado logros</string>
     <string name="anilist_favourites">Animes favoritos</string>
+    <string name="anilist_fav_characters">Personajes favoritos</string>
+    <string name="anilist_fav_staff">Staff favorito</string>
+    <string name="anilist_fav_studios">Estudios favoritos</string>
     <string name="anilist_no_favourites">Sin favoritos</string>
     <string name="anilist_count_suffix">%1$d animes</string>
     <string name="anilist_medal_1">Iniciado del Anime|10+ animes registrados</string>

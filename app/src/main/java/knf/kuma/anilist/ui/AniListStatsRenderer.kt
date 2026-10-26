@@ -263,6 +263,39 @@ class AniListStatsRenderer(private val activity: AniListActivity, private val co
             }
             addView(HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; addView(strip) })
         }
+
+        favouriteStrip(R.string.anilist_fav_characters, p.favCharacters)
+        favouriteStrip(R.string.anilist_fav_staff, p.favStaff)
+        if (p.favStudios.isNotEmpty()) card(ctx.getString(R.string.anilist_fav_studios)) {
+            p.favStudios.forEach { st ->
+                addView(text("• ${st.name}", 14f).apply {
+                    setPadding(0, dp(4), 0, dp(4))
+                    st.url?.let { url -> setOnClickListener { AniListDrawer.openUrl(ctx, url) } }
+                })
+            }
+        }
+    }
+
+    /** Personajes / staff favoritos: fila horizontal de retratos redondos que abren su página en AniList. */
+    private fun favouriteStrip(titleRes: Int, items: List<AniListApi.FavouriteItem>) {
+        if (items.isEmpty()) return
+        card(ctx.getString(titleRes)) {
+            val strip = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
+            items.forEach { f ->
+                strip.addView(LinearLayout(ctx).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.CENTER_HORIZONTAL
+                    val img = ImageView(ctx).apply { scaleType = ImageView.ScaleType.CENTER_CROP }
+                    f.image?.let { Glide.with(img).load(it).circleCrop().into(img) }
+                    addView(img, LinearLayout.LayoutParams(dp(80), dp(80)))
+                    addView(text(f.name, 12f).apply {
+                        maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; gravity = Gravity.CENTER
+                    }, LinearLayout.LayoutParams(dp(88), -2))
+                    f.url?.let { url -> setOnClickListener { AniListDrawer.openUrl(ctx, url) } }
+                }, LinearLayout.LayoutParams(-2, -2).apply { marginEnd = dp(8) })
+            }
+            addView(HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; addView(strip) })
+        }
     }
 
     private fun medal(res: Int, unlocked: Boolean): View {
