@@ -18,11 +18,13 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import knf.kuma.R
 import knf.kuma.database.CacheDB
 import knf.kuma.pojos.av1.Organizer
 import knf.kuma.retrofit.Repository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import kotlin.math.floor
@@ -40,12 +42,16 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
         var unmatched = 0
         for ((index, entry) in entries.withIndex()) {
             progress(index + 1, entries.size, entry.media.titles.first())
+            suspend fun report(episodes: Int, failed: Boolean) = workProgress(index + 1, entries.size, entry.media, episodes, imported, unmatched, failed)
+            report(-1, false)
             try {
                 val mapping = AniListMatcher.findAppAnime(entry.media)
                 if (mapping == null) {
                     unmatched++
+                    report(0, true)
                     continue
                 }
+                var marked = 0
                 val state = stateFor(entry.status)
                 val current = organizerDAO.getByAid(mapping.aid)?.organizer
                 val episodes = if (entry.status == "COMPLETED") Int.MAX_VALUE else entry.progress
@@ -53,6 +59,7 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
                     val dir = Repository.getDirectory(mapping.slug)
                     if (dir != null) {
                         val seen = dir.chapters.filter { it.number <= episodes }
+                        marked = seen.size
                         seen.forEach { recordDAO.addChapterIgnore(it.asRecord(dir)) }
                         CacheDB.INSTANCE.aniListScrobbleDAO().addIgnore(seen.map {
                             AniListScrobbleState(dir.slug, floor(it.number).toInt(), dir.aid, dir.name, AniListScrobbleState.SYNCED)
@@ -64,8 +71,11 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
                     organizerDAO.add(Organizer(mapping.aid, entry.media.titles.first(), mapping.slug, current?.lastWatched ?: -1, state))
                 }
                 imported++
+                report(marked, false)
             } catch (e: Exception) {
                 e.printStackTrace()
+                unmatched++
+                report(0, true)
             }
         }
         Log.i("AniList", "Importados $imported, sin coincidencia $unmatched de ${entries.size}")
@@ -74,6 +84,16 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
         notify(builder().setContentTitle(applicationContext.getString(R.string.anilist_import_complete_title))
             .setContentText(AniListSync.lastImport).setOngoing(false).setAutoCancel(true).build())
         Result.success()
+    }
+
+    /** Progreso para la ventana de sincronización (AniListSyncDialog). episodes = -1: aún procesando ese anime. */
+    private suspend fun workProgress(index: Int, total: Int, media: AniListApi.Media, episodes: Int, ok: Int, fail: Int, failed: Boolean) {
+        runCatching {
+            setProgress(workDataOf(P_INDEX to index, P_TOTAL to total, P_TITLE to media.titles.first(), P_COVER to media.cover,
+                P_EPISODES to episodes, P_OK to ok, P_FAIL to fail, P_FAILED to failed))
+        }
+        // Una pausa breve para que la ventana alcance a mostrar el resultado (y la animación de rechazo).
+        if (episodes >= 0) delay(if (failed) 900 else 150)
     }
 
     private fun ensureChannel() {
@@ -128,7 +148,15 @@ class AniListImportWorker(context: Context, params: WorkerParameters) : Coroutin
     }
 
     companion object {
-        private const val NAME = "anilist-import"
+        const val NAME = "anilist-import"
+        const val P_INDEX = "index"
+        const val P_TOTAL = "total"
+        const val P_TITLE = "title"
+        const val P_COVER = "cover"
+        const val P_EPISODES = "episodes"
+        const val P_OK = "ok"
+        const val P_FAIL = "fail"
+        const val P_FAILED = "failed"
         private const val CHANNEL = "anilist_sync"
         private const val NOTIFICATION_ID = 7006
 

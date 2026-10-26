@@ -6,11 +6,11 @@ import org.json.JSONObject
 /** Consultas GraphQL a AniList. Todas son bloqueantes: llamar fuera del hilo principal. */
 object AniListApi {
 
-    data class Media(val id: Int, val titles: List<String>, val episodes: Int?)
+    data class Media(val id: Int, val titles: List<String>, val episodes: Int?, val cover: String? = null)
 
     data class Entry(val media: Media, val status: String, val progress: Int)
 
-    private val MEDIA_FIELDS = "id episodes synonyms title { romaji english native }"
+    private val MEDIA_FIELDS = "id episodes synonyms title { romaji english native } coverImage { medium }"
 
     /** Elemento de la lista del usuario para la pantalla AniList (portada, progreso, puntuación). */
     data class ListItem(
@@ -55,7 +55,8 @@ object AniListApi {
         val title = getJSONObject("title")
         val titles = listOf("romaji", "english", "native").mapNotNull { title.optString(it).takeIf { s -> s.isNotBlank() && s != "null" } } +
                 (optJSONArray("synonyms") ?: JSONArray()).let { arr -> (0 until arr.length()).map { arr.getString(it) } }
-        return Media(getInt("id"), titles, if (isNull("episodes")) null else getInt("episodes"))
+        return Media(getInt("id"), titles, if (isNull("episodes")) null else getInt("episodes"),
+            optJSONObject("coverImage")?.optString("medium")?.takeIf { it.isNotBlank() && it != "null" })
     }
 
     /** null si falló la conexión; lista vacía si AniList no encontró nada. */
@@ -85,23 +86,29 @@ object AniListApi {
         return result.distinctBy { it.media.id }
     }
 
-    /** Progreso actual del usuario en ese anime (null si no está en su lista) y total de episodios. */
-    fun currentProgress(mediaId: Int): Pair<Int?, Int?>? {
+    /** Entrada del usuario en ese anime: progreso/estado/repeticiones (null si no está en su lista) y total de episodios. */
+    data class ListEntry(val progress: Int?, val total: Int?, val status: String?, val repeat: Int)
+
+    fun listEntry(mediaId: Int): ListEntry? {
         val data = AniListAuth.query(
-            "query (\$m: Int) { Media(id: \$m) { episodes mediaListEntry { progress } } }",
+            "query (\$m: Int) { Media(id: \$m) { episodes mediaListEntry { progress status repeat } } }",
             JSONObject().put("m", mediaId)
         )?.optJSONObject("Media") ?: return null
-        val progress = data.optJSONObject("mediaListEntry")?.optInt("progress")
+        val entry = data.optJSONObject("mediaListEntry")
         val total = if (data.isNull("episodes")) null else data.getInt("episodes")
-        return progress to total
+        return ListEntry(entry?.optInt("progress"), total, entry?.optString("status"), entry?.optInt("repeat") ?: 0)
     }
 
-    /** status: CURRENT, COMPLETED, ... Devuelve true si AniList aceptó el cambio. */
-    fun saveProgress(mediaId: Int, progress: Int, status: String?): Boolean {
+    /** Progreso actual del usuario en ese anime (null si no está en su lista) y total de episodios. */
+    fun currentProgress(mediaId: Int): Pair<Int?, Int?>? = listEntry(mediaId)?.let { it.progress to it.total }
+
+    /** status: CURRENT, COMPLETED, REPEATING... repeat != null cambia el contador de rewatch. True si AniList lo aceptó. */
+    fun saveProgress(mediaId: Int, progress: Int, status: String?, repeat: Int? = null): Boolean {
         val vars = JSONObject().put("m", mediaId).put("p", progress)
         status?.let { vars.put("s", it) }
+        repeat?.let { vars.put("r", it) }
         return AniListAuth.query(
-            "mutation (\$m: Int, \$p: Int, \$s: MediaListStatus) { SaveMediaListEntry(mediaId: \$m, progress: \$p, status: \$s) { id progress status } }",
+            "mutation (\$m: Int, \$p: Int, \$s: MediaListStatus, \$r: Int) { SaveMediaListEntry(mediaId: \$m, progress: \$p, status: \$s, repeat: \$r) { id progress status repeat } }",
             vars
         )?.optJSONObject("SaveMediaListEntry") != null
     }

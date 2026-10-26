@@ -292,6 +292,22 @@
     <string name="anilist_reason_not_found">AniList no encontró \"%s\"</string>
     <string name="anilist_reason_rejected">AniList rechazó la actualización</string>
     <string name="anilist_scrobble_registered">AniList: %1$s, episodio %2$s registrado</string>
+    <string name="anilist_rewatch_registered">AniList: %1$s, episodio %2$s registrado como rewatch</string>
+    <string name="anilist_status_registered">AniList: %1$s movido a %2$s</string>
+    <string name="anilist_status_failed">AniList: no se pudo cambiar el estado de %1$s</string>
+    <string name="anilist_retry_all">Reintentar todo</string>
+    <string name="anilist_sync_dialog_title">Sincronizando con AniList</string>
+    <string name="anilist_sync_dialog_message">Deja la app abierta mientras se sincroniza tu lista para que termine bien. Puede tardar unos minutos.</string>
+    <string name="anilist_sync_dialog_starting">Obteniendo tu lista de AniList…</string>
+    <string name="anilist_sync_dialog_step">Anime %1$d de %2$d</string>
+    <string name="anilist_sync_dialog_counters">Sincronizados: %1$d · No sincronizados: %2$d</string>
+    <string name="anilist_sync_dialog_searching">Buscando en la app…</string>
+    <string name="anilist_sync_dialog_episodes">%d episodios marcados como vistos</string>
+    <string name="anilist_sync_dialog_no_episodes">Lista actualizada (sin episodios vistos)</string>
+    <string name="anilist_sync_dialog_failed">No se encontró en la app</string>
+    <string name="anilist_sync_dialog_done">Sincronización terminada</string>
+    <string name="anilist_sync_dialog_hide">Ocultar</string>
+    <string name="anilist_sync_dialog_close">Listo</string>
 
     <!-- Acerca de (Fork y créditos) -->
     <string name="about_description">Fork no oficial de UKIKU con sincronización automática con AniList: importa tu biblioteca y registra cada episodio que terminas. Sin anuncios.</string>

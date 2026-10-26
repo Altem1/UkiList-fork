@@ -86,10 +86,17 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
             val owner = runCatching { fragment.viewLifecycleOwner }.getOrDefault(fragment)
             CacheDB.INSTANCE.aniListScrobbleDAO().bySlugLive(anime.slug).observe(owner) { list ->
                 syncStates = list.associate { it.episode to it.status }
+                // Episodios con estado de sync están vistos (p. ej. marcados desde el progreso de AniList).
+                chapters.forEachIndexed { index, chapter ->
+                    if (!chapter.isSeen && syncStates.containsKey(kotlin.math.floor(chapter.number).toInt())) {
+                        chapter.isSeen = true
+                        notifyItemChanged(index)
+                    }
+                }
                 notifyItemRangeChanged(0, itemCount, PAYLOAD_SYNC)
             }
         }
-        knf.kuma.anilist.AniListBackfill.check(anime.aid, anime.slug, anime.name)
+        knf.kuma.anilist.AniListBackfill.check(anime, chapters)
         if (chapters.isNotEmpty()) {
             noCrash {
                 doAsync {

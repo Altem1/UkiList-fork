@@ -10,6 +10,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import knf.kuma.R
+import knf.kuma.commons.toast
 import knf.kuma.database.CacheDB
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,7 +30,10 @@ class AniListStatusWorker(context: Context, params: WorkerParameters) : Coroutin
         val name = inputData.getString(EXTRA_NAME) ?: directory?.name ?: return@withContext Result.failure()
         val mediaId = when (val r = AniListMatcher.findAniListId(aid, slug, name)) {
             is AniListMatcher.Lookup.Found -> r.mediaId
-            AniListMatcher.Lookup.NotFound -> return@withContext Result.failure()
+            AniListMatcher.Lookup.NotFound -> {
+                notify(applicationContext.getString(R.string.anilist_status_failed, name))
+                return@withContext Result.failure()
+            }
             AniListMatcher.Lookup.NetworkError -> return@withContext Result.retry()
         }
         Log.i("AniList", "Estado: aid=$aid mediaId=$mediaId -> $status")
@@ -36,8 +41,16 @@ class AniListStatusWorker(context: Context, params: WorkerParameters) : Coroutin
             "mutation (\$m: Int, \$s: MediaListStatus) { SaveMediaListEntry(mediaId: \$m, status: \$s) { id status } }",
             JSONObject().put("m", mediaId).put("s", status)
         )?.optJSONObject("SaveMediaListEntry") != null
-        if (saved) Result.success() else Result.retry()
+        if (saved) {
+            notify(applicationContext.getString(R.string.anilist_status_registered, name, labelFor(status)))
+            Result.success()
+        } else if (runAttemptCount + 1 >= MAX_ATTEMPTS) {
+            notify(applicationContext.getString(R.string.anilist_status_failed, name))
+            Result.failure()
+        } else Result.retry()
     }
+
+    private suspend fun notify(message: String) = withContext(Dispatchers.Main) { message.toast() }
 
     companion object {
         private const val EXTRA_AID = "anilist_aid"
@@ -54,6 +67,15 @@ class AniListStatusWorker(context: Context, params: WorkerParameters) : Coroutin
             4 -> "DROPPED"
             5 -> "PAUSED"
             else -> null
+        }
+
+        fun labelFor(status: String): String = when (status) {
+            "CURRENT" -> "Viendo"
+            "PLANNING" -> "Planeado"
+            "COMPLETED" -> "Completado"
+            "DROPPED" -> "Abandonado"
+            "PAUSED" -> "Pausado"
+            else -> status
         }
 
         fun enqueue(context: Context, aid: Int, slug: String?, name: String?, state: Int) {

@@ -183,6 +183,8 @@ class Main : GenericActivity(),
             badgeEmission = navigationView.menu.findItem(R.id.drawer_emision).actionView as TextView
             badgeSeeing = navigationView.menu.findItem(R.id.drawer_seeing).actionView as TextView
             badgeQueue = navigationView.menu.findItem(R.id.drawer_queue).actionView as TextView
+            knf.kuma.anilist.AniListExceptionsActivity.bindDrawerItem(this@Main, navigationView.menu.findItem(R.id.drawer_anilist_exceptions))
+            knf.kuma.anilist.ui.AniListSyncDialog.observe(this@Main)
             navigationView.getHeaderView(0).findViewById<View>(R.id.img).setBackgroundResource(EAHelper.getThemeImg())
             val header = navigationView.getHeaderView(0).findViewById<View>(R.id.img)
             ViewCompat.setOnApplyWindowInsetsListener(header) { v, insets ->
@@ -500,6 +502,7 @@ class Main : GenericActivity(),
             R.id.drawer_anilist -> knf.kuma.anilist.ui.AniListActivity.open(this)
             R.id.drawer_anilist_stats -> knf.kuma.anilist.ui.AniListActivity.openSingle(this, true)
             R.id.drawer_anilist_profile -> knf.kuma.anilist.ui.AniListActivity.openSingle(this, false)
+            R.id.drawer_anilist_exceptions -> startActivity(Intent(this, knf.kuma.anilist.AniListExceptionsActivity::class.java))
             R.id.drawer_suggestions -> RecommendActivity.open(this)
             R.id.drawer_news -> MaterialNewsActivity.open(this)
             R.id.drawer_records -> RecordActivity.open(this)

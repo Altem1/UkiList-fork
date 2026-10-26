@@ -52,6 +52,12 @@
         android:icon="@drawable/ic_drawer_profile"
         android:title="@string/anilist_tab_profile"/>
     <item
+        android:id="@+id/drawer_anilist_exceptions"
+        android:icon="@drawable/ic_anilist_pending"
+        android:title="@string/anilist_exceptions_title"
+        android:visible="false"
+        app:actionViewClass="android.widget.TextView"/>
+    <item
         android:id="@+id/drawer_random"
         android:icon="@drawable/ic_random"
         android:title="Random"/>

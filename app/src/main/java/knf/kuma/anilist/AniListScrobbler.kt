@@ -128,17 +128,33 @@ class AniListScrobbleWorker(context: Context, params: WorkerParameters) : Corout
             }
             AniListMatcher.Lookup.NetworkError -> return@withContext failOrRetry(applicationContext.getString(R.string.anilist_error_network))
         }
-        val (current, total) = AniListApi.currentProgress(mediaId)
+        val entry = AniListApi.listEntry(mediaId)
             ?: return@withContext failOrRetry(applicationContext.getString(R.string.anilist_error_network))
-        Log.i("AniList", "Scrobble: mediaId=$mediaId actual=$current total=$total -> $episode")
-        if (current != null && current >= episode) {
+        val current = entry.progress
+        val total = entry.total
+        Log.i("AniList", "Scrobble: mediaId=$mediaId actual=$current estado=${entry.status} total=$total -> $episode")
+        val finished = total != null && episode >= total
+        // Volver a ver un anime ya completado cuenta como rewatch (REPEATING), no como si se viera por primera vez.
+        val save: Triple<Int, String, Int?>? = when (entry.status) {
+            "COMPLETED" -> if (finished) Triple(episode, "COMPLETED", entry.repeat + 1) else Triple(episode, "REPEATING", null)
+            "REPEATING" -> when {
+                current != null && current >= episode -> null
+                finished -> Triple(episode, "COMPLETED", entry.repeat + 1)
+                else -> Triple(episode, "REPEATING", null)
+            }
+            else -> if (current != null && current >= episode) null
+                else Triple(episode, if (finished) "COMPLETED" else "CURRENT", null)
+        }
+        if (save == null) {
             state(AniListScrobbleState.SYNCED)
             return@withContext Result.success()
         }
-        val status = if (total != null && episode >= total) "COMPLETED" else "CURRENT"
-        if (AniListApi.saveProgress(mediaId, episode, status)) {
+        if (AniListApi.saveProgress(mediaId, save.first, save.second, save.third)) {
             state(AniListScrobbleState.SYNCED)
-            withContext(Dispatchers.Main) { applicationContext.getString(R.string.anilist_scrobble_registered, name, episode.toString()).toast() }
+            val message = if (save.second == "REPEATING" || save.third != null)
+                applicationContext.getString(R.string.anilist_rewatch_registered, name, episode.toString())
+            else applicationContext.getString(R.string.anilist_scrobble_registered, name, episode.toString())
+            withContext(Dispatchers.Main) { message.toast() }
             Result.success()
         } else failOrRetry(applicationContext.getString(R.string.anilist_reason_rejected))
     }

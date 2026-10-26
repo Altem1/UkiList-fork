@@ -1,11 +1,17 @@
 package knf.kuma.anilist
 
+import android.graphics.Typeface
 import android.os.Bundle
+import android.view.Gravity
+import android.view.Menu
+import android.view.MenuItem
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,8 +50,22 @@ class AniListExceptionsActivity : GenericActivity() {
         }
         dao.failedLive().observe(this) {
             adapter.items = it
+            invalidateOptionsMenu()
             empty.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        if (adapter.items.isNotEmpty())
+            menu.add(R.string.anilist_retry_all).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) return super.onOptionsItemSelected(item)
+        adapter.items.forEach { AniListScrobbleWorker.enqueue(this, it.aid, it.slug, it.name, it.episode) }
+        getString(R.string.anilist_retrying).toast()
+        return true
     }
 
     private fun onItem(item: AniListScrobbleState) {
@@ -120,6 +140,22 @@ class AniListExceptionsActivity : GenericActivity() {
             holder.title.text = getString(R.string.anilist_item_episode_format, item.name, item.episode.toString())
             holder.subtitle.text = item.reason ?: getString(R.string.anilist_error_unknown)
             holder.itemView.setOnClickListener { onItem(item) }
+        }
+    }
+
+    companion object {
+        /** Muestra la entrada del menú lateral solo si hay scrobbles fallidos, con el número como insignia. */
+        fun bindDrawerItem(owner: LifecycleOwner, item: MenuItem) {
+            val badge = item.actionView as? TextView
+            badge?.apply {
+                setTypeface(null, Typeface.BOLD)
+                gravity = Gravity.CENTER_VERTICAL
+                setTextColor(ContextCompat.getColor(context, EAHelper.getThemeColor()))
+            }
+            CacheDB.INSTANCE.aniListScrobbleDAO().failedCountLive().observe(owner) { count ->
+                item.isVisible = count > 0
+                badge?.text = count.toString()
+            }
         }
     }
 }
