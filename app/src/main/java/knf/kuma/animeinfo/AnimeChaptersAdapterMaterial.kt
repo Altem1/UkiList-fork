@@ -1,5 +1,8 @@
 package knf.kuma.animeinfo
 
+import knf.kuma.anilist.AniListAuth
+import knf.kuma.anilist.AniListScrobbleState
+import kotlin.math.floor
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -72,9 +75,17 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
     private var seeingObject: OrganizerWRecord? = null
     var isImporting = false
     private var processingPosition = -1
+    /** Estado de sincronización con AniList por número de episodio. */
+    private var syncStates: Map<Int, Int> = emptyMap()
 
     init {
         setHasStableIds(true)
+        noCrash {
+            CacheDB.INSTANCE.aniListScrobbleDAO().bySlugLive(anime.slug).observe(fragment.viewLifecycleOwner) { list ->
+                syncStates = list.associate { it.episode to it.status }
+                notifyItemRangeChanged(0, itemCount, PAYLOAD_SYNC)
+            }
+        }
         if (chapters.isNotEmpty()) {
             noCrash {
                 doAsync {
@@ -96,6 +107,8 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
                 holder.cardView.setBackgroundColor(ContextCompat.getColor(context, EAHelper.getThemeColorLight()))
             else
                 holder.cardView.setBackgroundColor(fragment.getSurfaceColor())
+        if (payloads.contains(PAYLOAD_SYNC))
+            holder.bindSync(chapters[position])
         if (payloads.isEmpty())
             super.onBindViewHolder(holder, position, payloads)
     }
@@ -162,6 +175,7 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
         }
         holder.chapter.setTextColor(ContextCompat.getColor(context, if (chapter.isSeen) EAHelper.getThemeColor() else R.color.textPrimary))
         holder.separator.visibility = if (position == 0) View.GONE else View.VISIBLE
+        holder.bindSync(chapter)
         holder.chapter.text = chapter.name
         if (!isFullMode)
             holder.actions.visibility = View.GONE
@@ -413,6 +427,7 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
         val imageView: ImageView by itemView.bind(R.id.img)
         val chapter: TextView by itemView.bind(R.id.chapter)
         private val inDown: ImageView by itemView.bind(R.id.in_down)
+        private val anilistSync: ImageView by itemView.bind(R.id.anilist_sync)
         val actions: ImageButton by itemView.bind(R.id.actions)
         val progressBar: ProgressBar by itemView.bind(R.id.progress)
         val progressBarRoot: View by itemView.bind(R.id.progress_root)
@@ -423,6 +438,16 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
         private var downloadObserver: Observer<DownloadObject>? = null
         private var castingObserver: Observer<String>? = null
         private var queueObserver: Observer<Boolean>? = null
+
+        /** Nube: sincronizado con AniList. Nube tachada: visto pero pendiente o con error. */
+        fun bindSync(chapter: Chapter) {
+            val status = if (AniListAuth.isLoggedIn) syncStates[floor(chapter.number).toInt()] else null
+            anilistSync.visibility = if (status == null) View.GONE else View.VISIBLE
+            when (status) {
+                AniListScrobbleState.SYNCED -> anilistSync.setImageResource(R.drawable.ic_anilist_synced)
+                AniListScrobbleState.PENDING, AniListScrobbleState.FAILED -> anilistSync.setImageResource(R.drawable.ic_anilist_pending)
+            }
+        }
         var fileWrapperJob: Job? = null
 
         fun setDownloadObserver(downloadLiveData: LiveData<DownloadObject>, owner: LifecycleOwner?, observer: Observer<DownloadObject>) {
@@ -522,3 +547,5 @@ class AnimeChaptersAdapterMaterial(private val fragment: Fragment, private val r
     }
 
 }
+
+private const val PAYLOAD_SYNC = "anilist_sync"

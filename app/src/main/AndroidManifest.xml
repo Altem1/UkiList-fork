@@ -241,6 +241,7 @@
                     android:scheme="ukiku" />
             </intent-filter>
         </activity>
+        <activity android:name=".anilist.AniListExceptionsActivity" />
         <activity android:name=".record.RecordActivity" />
         <activity android:name="knf.kuma.anilist.ui.AniListActivity" />
         <activity android:name=".seeing.SeeingActivity" />

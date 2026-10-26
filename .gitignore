@@ -22,3 +22,5 @@ keys.keystore
 /resizer/
 /app/playstore/
 /media
+.claude/worktrees/
+.kotlin/

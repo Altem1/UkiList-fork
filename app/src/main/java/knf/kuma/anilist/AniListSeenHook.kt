@@ -11,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import knf.kuma.App
+import knf.kuma.commons.toast
 import knf.kuma.database.CacheDB
 import knf.kuma.pojos.av1.Record
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,9 @@ class AniListUnscrobbleWorker(context: Context, params: WorkerParameters) : Coro
         Log.i("AniList", "Unscrobble: aid=$aid mediaId=$mediaId actual=$current -> $localMax")
         CacheDB.INSTANCE.aniListScrobbleDAO().removeAbove(aid, localMax)
         if (current == null || current <= localMax) return@withContext Result.success()
-        if (AniListApi.saveProgress(mediaId, localMax, "CURRENT")) Result.success() else Result.retry()
+        if (!AniListApi.saveProgress(mediaId, localMax, "CURRENT")) return@withContext Result.retry()
+        withContext(Dispatchers.Main) { "AniList: ${directory?.name ?: "anime"}, progreso bajado a episodio $localMax".toast() }
+        Result.success()
     }
 
     companion object {
