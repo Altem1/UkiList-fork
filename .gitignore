@@ -23,3 +23,4 @@ keys.keystore
 /app/playstore/
 /media
 .claude/worktrees/
+.kotlin/
