@@ -498,6 +498,8 @@ class Main : GenericActivity(),
             R.id.drawer_emision -> EmissionActivity.open(this)
             R.id.drawer_queue -> if (knf.kuma.anilist.AniListAuth.isLoggedIn) knf.kuma.anilist.ui.AniListActivity.open(this, knf.kuma.anilist.ui.AniListActivity.TAB_PLANNING) else QueueActivity.open(this)
             R.id.drawer_anilist -> knf.kuma.anilist.ui.AniListActivity.open(this)
+            R.id.drawer_anilist_stats -> knf.kuma.anilist.ui.AniListActivity.openSingle(this, true)
+            R.id.drawer_anilist_profile -> knf.kuma.anilist.ui.AniListActivity.openSingle(this, false)
             R.id.drawer_suggestions -> RecommendActivity.open(this)
             R.id.drawer_news -> MaterialNewsActivity.open(this)
             R.id.drawer_records -> RecordActivity.open(this)

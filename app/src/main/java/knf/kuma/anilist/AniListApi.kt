@@ -148,12 +148,12 @@ object AniListApi {
 
     /** Perfil + estadísticas de anime del usuario en una sola petición. null si falló. */
     fun userProfile(userId: Int): UserProfile? {
-        val stat = "count episodesWatched minutesWatched meanScore"
+        val stat = "count minutesWatched meanScore"
         val data = AniListAuth.query(
             "query (\$u: Int) { User(id: \$u) { id name about(asHtml: false) avatar { large } bannerImage createdAt siteUrl " +
                     "favourites { anime(page: 1, perPage: 15) { nodes { id title { romaji english native } coverImage { large } } } } " +
                     "statistics { anime { count episodesWatched minutesWatched meanScore standardDeviation " +
-                    "statuses { status $stat } formats { format $stat } scores(sort: MEAN_SCORE) { score count episodesWatched minutesWatched } " +
+                    "statuses { status $stat } formats { format $stat } scores(sort: MEAN_SCORE) { score count minutesWatched } " +
                     "genres(limit: 15, sort: COUNT_DESC) { genre $stat } releaseYears(sort: ID_DESC) { releaseYear $stat } } } } }",
             JSONObject().put("u", userId)
         )?.optJSONObject("User") ?: return null

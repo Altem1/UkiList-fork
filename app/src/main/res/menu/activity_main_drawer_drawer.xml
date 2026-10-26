@@ -44,6 +44,14 @@
         android:visible="@bool/showUncensored"
         android:title="Historial"/>
     <item
+        android:id="@+id/drawer_anilist_stats"
+        android:icon="@drawable/ic_drawer_stats"
+        android:title="@string/anilist_tab_stats"/>
+    <item
+        android:id="@+id/drawer_anilist_profile"
+        android:icon="@drawable/ic_drawer_profile"
+        android:title="@string/anilist_tab_profile"/>
+    <item
         android:id="@+id/drawer_random"
         android:icon="@drawable/ic_random"
         android:title="Random"/>

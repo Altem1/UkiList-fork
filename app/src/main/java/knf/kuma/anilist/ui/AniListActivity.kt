@@ -63,9 +63,15 @@ class AniListActivity : GenericActivity() {
         statsScroll = findViewById(R.id.stats_scroll)
         renderer = AniListStatsRenderer(this, findViewById(R.id.stats_container))
         tabs.forEach { tabLayout.addTab(tabLayout.newTab().setText(it.first)) }
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.anilist_tab_stats))
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.anilist_tab_profile))
-        tabLayout.getTabAt((savedInstanceState?.getInt(EXTRA_TAB) ?: intent.getIntExtra(EXTRA_TAB, 1)).coerceIn(0, profileTab))?.select()
+        // Estadísticas y Perfil son entradas propias del menú lateral: se abren solas, sin la barra de pestañas.
+        val single = intent.getBooleanExtra(EXTRA_SINGLE, false)
+        if (single) {
+            tabLayout.addTab(tabLayout.newTab().setText(R.string.anilist_tab_stats))
+            tabLayout.addTab(tabLayout.newTab().setText(R.string.anilist_tab_profile))
+            tabLayout.visibility = View.GONE
+        }
+        tabLayout.getTabAt((savedInstanceState?.getInt(EXTRA_TAB) ?: intent.getIntExtra(EXTRA_TAB, 1)).coerceIn(0, tabLayout.tabCount - 1))?.select()
+        if (single) title = getString(if (tabLayout.selectedTabPosition == statsTab) R.string.anilist_tab_stats else R.string.anilist_tab_profile)
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) = filter()
             override fun onTabUnselected(tab: TabLayout.Tab) {}
@@ -246,8 +252,17 @@ class AniListActivity : GenericActivity() {
         const val TAB_HISTORY = 0
         const val TAB_PLANNING = 2
 
+        private const val EXTRA_SINGLE = "single"
+        private const val listTabCount = 7 // tamaño de [tabs]
+
         fun open(context: Context, tab: Int = 1) {
             context.startActivity(Intent(context, AniListActivity::class.java).putExtra(EXTRA_TAB, tab))
+        }
+
+        /** [stats] true abre Estadísticas, false abre Perfil. */
+        fun openSingle(context: Context, stats: Boolean) {
+            val tab = listTabCount + if (stats) 0 else 1
+            context.startActivity(Intent(context, AniListActivity::class.java).putExtra(EXTRA_TAB, tab).putExtra(EXTRA_SINGLE, true))
         }
     }
 }
