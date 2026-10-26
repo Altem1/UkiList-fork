@@ -105,6 +105,7 @@ class NextEpisodeAutoplay(
                 onFinish()
                 return@launch
             }
+            removeOverlay()
             val wid = n.chapter.withID(n.anime)
             // Igual que al abrirlo a mano: queda como visto (sin scrobble; eso lo hace el tracker al 85%).
             withContext(Dispatchers.IO) { runCatching { CacheDB.INSTANCE.recordAV1DAO().addChapter(wid.asRecord()) } }
@@ -117,13 +118,19 @@ class NextEpisodeAutoplay(
                     .putExtra("server_name", r.serverName)
                     .putExtra("server_lang", intent.getIntExtra("server_lang", 0))
             )
-            activity.finish()
+            // BasicExoplayer es singleTask: onNewIntent carga el siguiente episodio en esta misma instancia.
         }
     }
 
     fun cancel() {
         timer?.cancel()
         timer = null
+        removeOverlay()
+    }
+
+    private fun removeOverlay() {
+        overlay?.let { root.removeView(it) }
+        overlay = null
     }
 
     companion object {

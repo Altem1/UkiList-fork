@@ -441,6 +441,7 @@ object FileActions {
     }
 
     private fun startStreaming(actionRequest: ActionRequest, option: Option) {
+        val serverName = servers.getOrNull(selected)?.name
         reset()
         if (actionRequest.item is ChapterWID && actionRequest.downloadObject.addQueue) {
             QueueManager.add(Uri.parse(option.url), false, actionRequest.item)
@@ -453,7 +454,7 @@ object FileActions {
                                     .setData(Uri.parse(option.url))
                                     .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                                     .putExtra("headers", option.headers?.headers?.toArray())
-                                    .putExtra("server_name", servers.getOrNull(selected)?.name)
+                                    .putExtra("server_name", serverName)
                                     .putExtra("server_lang", selectedLang)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 } else {
@@ -470,7 +471,7 @@ object FileActions {
                                 .setData(Uri.parse(option.url))
                                 .putExtra("title", actionRequest.downloadObject.title).withScrobble(actionRequest.scrobbleTarget())
                                 .putExtra("headers", option.headers?.headers?.toArray())
-                                .putExtra("server_name", servers.getOrNull(selected)?.name)
+                                .putExtra("server_name", serverName)
                                 .putExtra("server_lang", selectedLang)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }

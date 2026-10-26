@@ -65,7 +65,8 @@ object NextEpisodeResolver {
                 val list = obj.optJSONArray(key) ?: continue
                 for (i in 0 until list.length()) {
                     val link = list.getJSONObject(i).getString("url")
-                    if (target.any { it.baseLink.substringAfterLast("/") == link.substringAfterLast("/") }) continue
+                    fun key(l: String) = l.substringBeforeLast("?").substringAfterLast("/")
+                    if (target.any { key(it.baseLink) == key(link) }) continue
                     // Los servidores web (que abren una página) no sirven para el autoplay.
                     Server.check(context, link)?.takeIf { it.canStream }?.let { target.add(it) }
                 }
