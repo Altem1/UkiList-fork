@@ -40,6 +40,12 @@ class AniListActivity : GenericActivity() {
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var empty: TextView
     private lateinit var tabLayout: TabLayout
+    private lateinit var statsScroll: View
+    private lateinit var renderer: AniListStatsRenderer
+    private var profile: AniListApi.UserProfile? = null
+    private var profileLoading = false
+    private val statsTab get() = tabs.size
+    private val profileTab get() = tabs.size + 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(EAHelper.getTheme())
@@ -52,15 +58,20 @@ class AniListActivity : GenericActivity() {
         empty = findViewById(R.id.empty)
         tabLayout = findViewById(R.id.tabs)
         findViewById<RecyclerView>(R.id.recycler).adapter = adapter
+        statsScroll = findViewById(R.id.stats_scroll)
+        renderer = AniListStatsRenderer(this, findViewById(R.id.stats_container))
         tabs.forEach { tabLayout.addTab(tabLayout.newTab().setText(it.first)) }
-        tabLayout.getTabAt((savedInstanceState?.getInt(EXTRA_TAB) ?: intent.getIntExtra(EXTRA_TAB, 1)).coerceIn(0, tabs.size - 1))?.select()
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.anilist_tab_stats))
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.anilist_tab_profile))
+        tabLayout.getTabAt((savedInstanceState?.getInt(EXTRA_TAB) ?: intent.getIntExtra(EXTRA_TAB, 1)).coerceIn(0, profileTab))?.select()
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) = filter()
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
-        refresh.setOnRefreshListener { load() }
+        refresh.setOnRefreshListener { profile = null; load() }
         load()
+        filter()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -91,11 +102,52 @@ class AniListActivity : GenericActivity() {
     }
 
     private fun filter() {
-        val status = tabs[tabLayout.selectedTabPosition.coerceAtLeast(0)].second
+        val pos = tabLayout.selectedTabPosition.coerceAtLeast(0)
+        if (pos >= tabs.size) {
+            refresh.visibility = View.GONE
+            statsScroll.visibility = View.VISIBLE
+            showExtra(pos)
+            return
+        }
+        statsScroll.visibility = View.GONE
+        refresh.visibility = View.VISIBLE
+        val status = tabs[pos].second
         val items = if (status == null) all.filter { it.updatedAt > 0 }.take(100) else all.filter { it.status == status }
         adapter.submit(items)
         empty.text = "Nada por aquí"
         empty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun showExtra(pos: Int) {
+        val p = profile
+        if (p != null) {
+            if (pos == statsTab) renderer.renderStats(p) else renderer.renderProfile(p)
+            return
+        }
+        if (!AniListAuth.isLoggedIn) {
+            renderer.showMessage("Conecta tu cuenta de AniList en Ajustes > Sincronización")
+            return
+        }
+        renderer.showMessage(getString(R.string.anilist_loading))
+        if (profileLoading) return
+        profileLoading = true
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { runCatching { AniListApi.userProfile(AniListAuth.userId) }.getOrNull() }
+            profileLoading = false
+            profile = result
+            val current = tabLayout.selectedTabPosition
+            if (current < tabs.size) return@launch
+            if (result == null) renderer.showMessage(getString(R.string.anilist_load_error)) else showExtra(current)
+        }
+    }
+
+    /** Favorito: abre la ficha en la app si hay mapeo; si no, la web de AniList. */
+    fun openFavourite(fav: AniListApi.FavouriteAnime) {
+        lifecycleScope.launch {
+            val mapping = withContext(Dispatchers.IO) { runCatching { CacheDB.INSTANCE.aniListMappingDAO().byAniList(fav.mediaId) }.getOrNull() }
+            if (mapping == null) AniListDrawer.openUrl(this@AniListActivity, "https://anilist.co/anime/${fav.mediaId}/")
+            else knf.kuma.animeinfo.ActivityAnimeMaterial.open(this@AniListActivity, "https://animeav1.com/media/${mapping.slug}")
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
