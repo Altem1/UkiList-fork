@@ -39,6 +39,7 @@ object AniListAuth {
     private const val KEY_USER_ID = "user_id"
     private const val KEY_USER_NAME = "user_name"
     private const val KEY_AVATAR = "avatar_url"
+    private const val KEY_BANNER = "banner_url"
 
     val client: OkHttpClient by lazy {
         val trustManager = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
@@ -52,6 +53,9 @@ object AniListAuth {
     val userName = MutableLiveData<String?>()
 
     val avatarUrl = MutableLiveData<String?>()
+
+    /** Banner (portada) del perfil de AniList; null si no tiene. */
+    val bannerUrl = MutableLiveData<String?>()
 
     private val prefs: SharedPreferences by lazy {
         EncryptedSharedPreferences.create(
@@ -67,6 +71,7 @@ object AniListAuth {
         noCrash {
             userName.postValue(if (isLoggedIn) prefs.getString(KEY_USER_NAME, null) else null)
             avatarUrl.postValue(if (isLoggedIn) prefs.getString(KEY_AVATAR, null) else null)
+            bannerUrl.postValue(if (isLoggedIn) prefs.getString(KEY_BANNER, null) else null)
         }
     }
 
@@ -125,15 +130,18 @@ object AniListAuth {
     }
 
     suspend fun fetchViewer(): Boolean = withContext(Dispatchers.IO) {
-        val data = query("query { Viewer { id name avatar { large } } }") ?: return@withContext false
+        val data = query("query { Viewer { id name avatar { large } bannerImage } }") ?: return@withContext false
         val viewer = data.optJSONObject("Viewer") ?: return@withContext false
+        val banner = if (viewer.isNull("bannerImage")) null else viewer.optString("bannerImage").takeIf { it.isNotBlank() }
         prefs.edit {
             putInt(KEY_USER_ID, viewer.getInt("id"))
             putString(KEY_USER_NAME, viewer.getString("name"))
             putString(KEY_AVATAR, viewer.optJSONObject("avatar")?.optString("large"))
+            putString(KEY_BANNER, banner)
         }
         userName.postValue(viewer.getString("name"))
         avatarUrl.postValue(viewer.optJSONObject("avatar")?.optString("large"))
+        bannerUrl.postValue(banner)
         true
     }
 
@@ -141,6 +149,7 @@ object AniListAuth {
         prefs.edit { clear() }
         userName.postValue(null)
         avatarUrl.postValue(null)
+        bannerUrl.postValue(null)
     }
 
     /** Ejecuta una query/mutación GraphQL y devuelve el objeto "data", o null si falla. Llamar fuera del hilo principal. */

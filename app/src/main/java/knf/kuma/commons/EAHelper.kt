@@ -260,7 +260,7 @@ object EAHelper {
     @DrawableRes
     fun getThemeImg(value: String): Int {
         when (value) {
-            "0" -> return R.drawable.side_nav_bar
+            "0" -> return R.drawable.side_nav_bar_ukilist
             "1" -> return R.drawable.side_nav_bar_pink
             "2" -> return R.drawable.side_nav_bar_purple
             "3" -> return R.drawable.side_nav_bar_deep_purple
