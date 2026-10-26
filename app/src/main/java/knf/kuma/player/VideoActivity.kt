@@ -1,5 +1,6 @@
 package knf.kuma.player
 
+import knf.kuma.anilist.AniListScrobbleTracker
 import android.app.PictureInPictureParams
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
@@ -50,6 +51,8 @@ class VideoActivity : AppCompatActivity(), PlayerHolder.PlayerCallback {
     private lateinit var playerState: PlayerState
     private lateinit var playerHolder: PlayerHolder
     var playList: List<QueueObject> = emptyList()
+
+    private var scrobbler: AniListScrobbleTracker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(EAHelper.getTheme())
@@ -234,6 +237,7 @@ class VideoActivity : AppCompatActivity(), PlayerHolder.PlayerCallback {
     // ExoPlayer related functions.
     private fun createPlayer() {
         playerHolder = PlayerHolder(this, playerState, binding.player, intent, playList)
+        scrobbler = AniListScrobbleTracker(this, intent).also { it.attach(playerHolder.audioFocusPlayer) }
         binding.youtubeOverlay.player(playerHolder.audioFocusPlayer)
         mediaSession = MediaSession.Builder(this, playerHolder.audioFocusPlayer)
             .setId(UUID.randomUUID().toString()).build()
@@ -269,6 +273,7 @@ class VideoActivity : AppCompatActivity(), PlayerHolder.PlayerCallback {
     }
 
     private fun releasePlayer() {
+        scrobbler?.detach()
         if (::playerHolder.isInitialized)
             playerHolder.release()
     }

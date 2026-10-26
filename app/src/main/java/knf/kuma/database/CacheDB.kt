@@ -1,5 +1,7 @@
 package knf.kuma.database
 
+import knf.kuma.anilist.AniListMapping
+import knf.kuma.anilist.AniListMappingDao
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
@@ -70,9 +72,10 @@ import knf.kuma.recents.RecentModel
         RecentAV1::class,
         Record::class,
         GenreRecord::class,
-        DirectoryAV1Calendar::class
+        DirectoryAV1Calendar::class,
+        AniListMapping::class
     ],
-    version = 22
+    version = 23
 )
 abstract class CacheDB : RoomDatabase() {
 
@@ -111,6 +114,8 @@ abstract class CacheDB : RoomDatabase() {
     abstract fun genreRecordDAO(): GenreRecordDao
 
     abstract fun calendarBlacklistDAO(): CalendarDao
+
+    abstract fun aniListMappingDAO(): AniListMappingDao
 
     companion object {
         private val MIGRATION_1_2: Migration = object : Migration(1, 2) {
@@ -385,6 +390,13 @@ abstract class CacheDB : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_22_23: Migration = object : Migration(22, 23) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `anilist_mapping` (`aid` INTEGER NOT NULL, `slug` TEXT NOT NULL, `anilistId` INTEGER NOT NULL, PRIMARY KEY(`aid`))")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_anilist_mapping_anilistId` ON `anilist_mapping` (`anilistId`)")
+            }
+        }
+
         val INSTANCE: CacheDB by lazy { init(App.context) }
 
         private fun init(context: Context): CacheDB =
@@ -411,7 +423,8 @@ abstract class CacheDB : RoomDatabase() {
                     MIGRATION_18_19,
                     MIGRATION_19_20,
                     MIGRATION_20_21,
-                    MIGRATION_21_22
+                    MIGRATION_21_22,
+                    MIGRATION_22_23
                 ).build()
     }
 

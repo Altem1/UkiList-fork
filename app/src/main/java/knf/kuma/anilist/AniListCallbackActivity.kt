@@ -19,8 +19,10 @@ class AniListCallbackActivity : ComponentActivity() {
             return
         }
         lifecycleScope.launch {
-            if (AniListAuth.fetchViewer())
+            if (AniListAuth.fetchViewer()) {
                 "Conectado a AniList como ${AniListAuth.userName.value ?: ""}".toast()
+                if (AniListSync.isLibrarySyncEnabled) AniListImportWorker.runNow(this@AniListCallbackActivity)
+            }
             else
                 "Error al obtener la cuenta de AniList".toast()
             backToApp()

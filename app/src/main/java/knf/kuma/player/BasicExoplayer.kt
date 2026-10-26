@@ -1,5 +1,6 @@
 package knf.kuma.player
 
+import knf.kuma.anilist.AniListScrobbleTracker
 import android.app.PictureInPictureParams
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -53,6 +54,7 @@ import xdroid.toaster.Toaster
 @UnstableApi
 class BasicExoplayer : AppCompatActivity(), Player.Listener {
     private var exoPlayer: ExoPlayer? = null
+    private var scrobbler: AniListScrobbleTracker? = null
     private var playerState: PlayerState = PlayerState()
     private var isEnding = false
     private var playList: List<QueueObject> = ArrayList()
@@ -119,6 +121,7 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
                 exoPlayer = ExoPlayer.Builder(this@BasicExoplayer).build()
                 binding.player.player = exoPlayer
                 exoPlayer?.addListener(this@BasicExoplayer)
+                scrobbler = AniListScrobbleTracker(this@BasicExoplayer, intent).also { it.attach(exoPlayer!!) }
                 addMedia(exoPlayer, intent)
                 exoPlayer?.prepare()
                 val canResume = playerState.window >= 0 && playerState.position >= 0
@@ -191,6 +194,7 @@ class BasicExoplayer : AppCompatActivity(), Player.Listener {
     }
 
     private fun releasePlayer() {
+        scrobbler?.detach()
         exoPlayer?.stop()
         exoPlayer?.release()
         exoPlayer = null

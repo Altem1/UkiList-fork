@@ -8,6 +8,18 @@
             android:key="anilist_account"
             android:persistent="false"
             app:iconSpaceReserved="false" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="anilist_sync_library"
+            android:summary="Marca como vistos en la app los episodios de tu lista de AniList"
+            android:title="Sincronizar biblioteca dentro de la app" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="anilist_auto_scrobble"
+            android:summary="Al terminar un episodio, actualiza tu progreso en AniList"
+            android:title="Sincronizar automáticamente a AniList" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Actualizaciones">
 

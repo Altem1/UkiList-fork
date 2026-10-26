@@ -1,5 +1,6 @@
 package knf.kuma.videoservers
 
+import knf.kuma.anilist.withScrobble
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.ActivityNotFoundException
@@ -344,7 +345,7 @@ class ServersFactory {
                     App.context.startActivity(
                             PrefsUtil.getPlayerIntent()
                                     .setData(Uri.parse(option.url))
-                                    .putExtra("title", downloadObject.title)
+                                    .putExtra("title", downloadObject.title).withScrobble(chapter)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW)
@@ -357,7 +358,7 @@ class ServersFactory {
                 App.context.startActivity(
                         PrefsUtil.getPlayerIntent()
                                 .setData(Uri.parse(option.url))
-                                .putExtra("title", downloadObject.title)
+                                .putExtra("title", downloadObject.title).withScrobble(chapter)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }
         }
