@@ -9,6 +9,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import knf.kuma.App
+import knf.kuma.R
+import knf.kuma.commons.toast
 import knf.kuma.BuildConfig
 import knf.kuma.commons.noCrash
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +33,9 @@ object AniListAuth {
 
     private const val KEY_TOKEN = "access_token"
     private const val KEY_EXPIRES = "expires_at"
+    private const val KEY_PENDING_STATE = "pending_state"
+    private const val KEY_PENDING_UNTIL = "pending_until"
+    private const val LOGIN_WINDOW_MS = 10 * 60 * 1000L
     private const val KEY_USER_ID = "user_id"
     private const val KEY_USER_NAME = "user_name"
     private const val KEY_AVATAR = "avatar_url"
@@ -66,7 +71,14 @@ object AniListAuth {
     }
 
     val token: String?
-        get() = if (isLoggedIn) prefs.getString(KEY_TOKEN, null) else null
+        get() {
+            if (!isLoggedIn && prefs.getString(KEY_TOKEN, null) != null) {
+                // Caducó (1 año): se cierra la sesión y se avisa, en vez de que los scrobbles fallen en silencio.
+                logout()
+                App.context.getString(R.string.anilist_session_expired).toast()
+            }
+            return if (isLoggedIn) prefs.getString(KEY_TOKEN, null) else null
+        }
 
     val userId: Int
         get() = prefs.getInt(KEY_USER_ID, -1)
@@ -79,16 +91,30 @@ object AniListAuth {
         get() = BuildConfig.ANILIST_CLIENT_ID.isNotBlank()
 
     fun launchLogin(context: Context) {
+        // Login de un solo uso: sin un login iniciado desde la app, el callback se rechaza (Login CSRF).
+        // Se guarda en prefs porque Android puede matar la app mientras el usuario está en el navegador.
+        val state = ByteArray(16).also { java.security.SecureRandom().nextBytes(it) }.joinToString("") { "%02x".format(it) }
+        prefs.edit {
+            putString(KEY_PENDING_STATE, state)
+            putLong(KEY_PENDING_UNTIL, System.currentTimeMillis() + LOGIN_WINDOW_MS)
+        }
         val uri = Uri.parse(AUTH_URL).buildUpon()
             .appendQueryParameter("client_id", BuildConfig.ANILIST_CLIENT_ID)
             .appendQueryParameter("response_type", "token")
+            .appendQueryParameter("state", state)
             .build()
         CustomTabsIntent.Builder().build().launchUrl(context, uri)
     }
 
     /** Implicit grant: ukiku://anilist-callback#access_token=...&expires_in=... */
     fun parseCallback(uri: Uri): Boolean {
+        val expected = prefs.getString(KEY_PENDING_STATE, null)
+        val inWindow = System.currentTimeMillis() <= prefs.getLong(KEY_PENDING_UNTIL, 0)
+        prefs.edit { remove(KEY_PENDING_STATE); remove(KEY_PENDING_UNTIL) }
+        if (expected == null || !inWindow) return false
         val params = Uri.parse("?" + (uri.fragment ?: return false))
+        val returned = params.getQueryParameter("state") ?: uri.getQueryParameter("state")
+        if (returned != null && returned != expected) return false
         val accessToken = params.getQueryParameter("access_token") ?: return false
         val expiresIn = params.getQueryParameter("expires_in")?.toLongOrNull()
         prefs.edit {

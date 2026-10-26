@@ -13,6 +13,7 @@ class AniListCallbackActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val uri = intent?.data
+        intent?.data = null // no retener el access_token en el Intent
         if (uri == null || !AniListAuth.parseCallback(uri)) {
             "No se pudo conectar con AniList".toast()
             backToApp()
