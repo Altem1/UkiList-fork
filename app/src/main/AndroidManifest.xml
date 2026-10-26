@@ -61,13 +61,13 @@
         android:banner="@drawable/tv_banner"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/launcher_name"
         android:resizeableActivity="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme.DayNight"
         android:networkSecurityConfig="@xml/network_security"
         android:usesCleartextTraffic="true"
-        tools:replace="android:fullBackupContent">
+        tools:replace="android:fullBackupContent,android:label">
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

@@ -38,7 +38,7 @@ open class GenericActivity : AppCompatActivity() {
         noCrash {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
                 val appIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
-                setTaskDescription(ActivityManager.TaskDescription(getString(R.string.app_name), appIcon, ContextCompat.getColor(this, R.color.colorPrimary)))
+                setTaskDescription(ActivityManager.TaskDescription(getString(R.string.launcher_name), appIcon, ContextCompat.getColor(this, R.color.colorPrimary)))
             }
         }
         logText("On Resume check")

@@ -49,7 +49,7 @@ class UpdateWork(val context: Context, workerParameters: WorkerParameters) : Wor
         try {
             val notification = NotificationCompat.Builder(context, CHANNEL).apply {
                 setSmallIcon(R.drawable.ic_not_update)
-                setContentTitle("UKIKU")
+                setContentTitle("UkiList")
                 setContentText("Nueva versión disponible")
                 setContentIntent(
                     PendingIntent.getActivity(

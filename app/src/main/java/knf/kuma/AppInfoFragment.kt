@@ -13,14 +13,20 @@ import knf.kuma.commons.DesignUtils
 import knf.kuma.commons.EAUnlockActivity
 import knf.kuma.commons.safeShow
 
-/** Acerca de: UKIKU AniList es un fork de UKIKU (MIT), por eso se conservan los créditos y la licencia original. */
+/** Acerca de: UkiList es un fork de UKIKU (MIT), por eso se conservan los créditos y la licencia original. */
 class AppInfoFragment : MaterialAboutFragment() {
 
     private val isFlat: Boolean by lazy { requireArguments().getBoolean("isFlat", true) }
 
     override fun getMaterialAboutList(context: Context): MaterialAboutList {
         val infoCard = MaterialAboutCard.Builder().outline(isFlat)
-        infoCard.addItem(ConvenienceBuilder.createAppTitleItem(requireContext()))
+        infoCard.addItem(
+            com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem.Builder()
+                .text(R.string.launcher_name)
+                .desc(R.string.about_description)
+                .icon(R.mipmap.ic_launcher)
+                .build()
+        )
         infoCard.addItem(
             MaterialAboutActionItem.Builder().text(R.string.about_version).subText(BuildConfig.VERSION_NAME)
                 .icon(R.drawable.ic_version).build()

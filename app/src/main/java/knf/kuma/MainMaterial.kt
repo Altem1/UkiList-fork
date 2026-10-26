@@ -472,7 +472,7 @@ class MainMaterial : GenericActivity(),
             try {
                 selectedFragment = fragment
                 if (selectedFragment is BottomPreferencesMaterialFragment) {
-                    toolbar.title = "UKIKU"
+                    toolbar.title = getString(R.string.launcher_name)
                     toolbar.changeToolbarFont(R.font.audiowide)
                 } else {
                     toolbar.title = "Buscar animes"
