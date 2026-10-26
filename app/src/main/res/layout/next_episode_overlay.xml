@@ -1,103 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Miniventana "Siguiente episodio" estilo Netflix (esquina inferior derecha del reproductor) -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<!-- Siguiente episodio estilo Netflix: miniatura del siguiente de fondo, el episodio actual encogido arriba a la izquierda
+     (lo anima NextEpisodeAutoplay) y a la derecha el título, la cuenta regresiva y los botones. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/next_overlay"
-    android:layout_width="320dp"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom|end"
-    android:layout_marginEnd="24dp"
-    android:layout_marginBottom="96dp"
-    android:background="@drawable/bg_next_episode"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF000000"
     android:clickable="true"
     android:focusable="true"
-    android:orientation="vertical"
-    android:padding="12dp"
     android:visibility="gone">
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/next_thumb"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:alpha="0.55"
+        android:scaleType="centerCrop" />
 
-        <ImageView
-            android:id="@+id/next_thumb"
-            android:layout_width="120dp"
-            android:layout_height="68dp"
-            android:background="#33FFFFFF"
-            android:scaleType="centerCrop" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_next_episode_scrim" />
+
+    <LinearLayout
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="40dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/next_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/next_episode_label"
+            android:textAllCaps="true"
+            android:textColor="#B3FFFFFF"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/next_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="#FFFFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/next_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="#E6FFFFFF"
+            android:textSize="14sp" />
+
+        <ProgressBar
+            android:id="@+id/next_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_marginTop="8dp"
+            android:max="1000"
+            android:progressTint="#FFFFFFFF"
+            android:progressBackgroundTint="#55FFFFFF" />
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/next_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/next_episode_label"
-                android:textColor="#B3FFFFFF"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/next_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textColor="#FFFFFF"
+                android:id="@+id/next_play"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_next_episode_button"
+                android:gravity="center"
+                android:text="@string/next_episode_play"
+                android:textColor="#FF000000"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/next_countdown"
+                android:id="@+id/next_cancel"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="#B3FFFFFF"
-                android:textSize="12sp" />
+                android:layout_height="44dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_next_episode"
+                android:gravity="center"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:text="@string/next_episode_cancel"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/next_progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_marginTop="10dp"
-        android:max="1000"
-        android:progressTint="#FFFFFF"
-        android:progressBackgroundTint="#55FFFFFF" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="end"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/next_cancel"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:text="@string/next_episode_cancel"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/next_play"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/bg_next_episode_button"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="@string/next_episode_play"
-            android:textColor="#000000"
-            app:backgroundTint="@null" />
-    </LinearLayout>
-</LinearLayout>
+</FrameLayout>

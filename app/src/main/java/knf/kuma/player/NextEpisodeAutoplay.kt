@@ -72,6 +72,7 @@ class NextEpisodeAutoplay(
         root.addView(view)
         overlay = view
         view.visibility = View.VISIBLE
+        shrinkPlayer(true)
         val wid = n.chapter.withID(n.anime)
         view.findViewById<TextView>(R.id.next_title).text = activity.getString(R.string.next_episode_title, n.anime.name, n.chapter.number.roundedString())
         runCatching { view.findViewById<ImageView>(R.id.next_thumb).load(wid.thumbnail) }
@@ -136,8 +137,26 @@ class NextEpisodeAutoplay(
     }
 
     private fun removeOverlay() {
+        if (overlay != null) shrinkPlayer(false)
         overlay?.let { root.removeView(it) }
         overlay = null
+    }
+
+    /** El episodio que terminó queda encogido arriba a la izquierda, por encima del fondo del siguiente. */
+    private fun shrinkPlayer(shrink: Boolean) {
+        val player = root.findViewById<View>(R.id.player) ?: return
+        (player as? androidx.media3.ui.PlayerView)?.apply { if (shrink) hideController(); useController = !shrink }
+        val margin = 24 * activity.resources.displayMetrics.density
+        player.pivotX = 0f
+        player.pivotY = 0f
+        if (shrink) {
+            player.translationZ = 20f
+            player.animate().scaleX(0.38f).scaleY(0.38f).translationX(margin).translationY(margin).setDuration(350).start()
+        } else {
+            player.animate().cancel()
+            player.scaleX = 1f; player.scaleY = 1f; player.translationX = 0f; player.translationY = 0f
+            player.translationZ = 0f
+        }
     }
 
     companion object {
