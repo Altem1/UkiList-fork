@@ -70,12 +70,7 @@ class AnimeChaptersMaterialHolder(view: View, private val fragment: Fragment, pr
                                         when (state) {
                                             BottomActionsDialog.STATE_SEEN -> doAsync {
                                                 val dao = CacheDB.INSTANCE.recordAV1DAO()
-                                                for (i13 in ArrayList(
-                                                    adapter?.selection
-                                                        ?: arrayListOf()
-                                                )) {
-                                                    dao.addChapter(chapters[i13].asRecord(anime!!))
-                                                }
+                                                dao.markSeen(ArrayList(adapter?.selection ?: arrayListOf()).map { chapters[it].asRecord(anime!!) })
                                                 fragment.doOnUI {
                                                     adapter?.apply {
                                                         if (selection.isNotEmpty()) {
@@ -95,6 +90,7 @@ class AnimeChaptersMaterialHolder(view: View, private val fragment: Fragment, pr
                                                         ?: arrayListOf())) {
                                                     dao.deleteChapter(anime!!.aid, chapters[i12].number)
                                                 }
+                                                knf.kuma.anilist.AniListSeenHook.onUnseen(anime!!.aid)
                                                 fragment.doOnUI {
                                                     adapter?.apply {
                                                         if (selection.isNotEmpty()) {

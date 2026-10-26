@@ -51,7 +51,7 @@ class RecordsAdapter(private val activity: AppCompatActivity) : PagingDataAdapte
     fun remove(position: Int) {
         activity.lifecycleScope.launch(Dispatchers.IO){
             getItem(position)?.let {
-                dao.delete(it)
+                dao.markUnseen(it)
             }
             syncData { history() }
         }

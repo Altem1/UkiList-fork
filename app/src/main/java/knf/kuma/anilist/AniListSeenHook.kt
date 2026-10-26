@@ -15,6 +15,7 @@ import knf.kuma.commons.toast
 import knf.kuma.database.CacheDB
 import knf.kuma.pojos.av1.Record
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import kotlin.math.floor
@@ -35,6 +36,9 @@ object AniListSeenHook {
 
     fun onUnseen(aid: Int) {
         if (!enabled) return
+        // La nube se quita al momento, aunque no haya red; AniList se actualiza después.
+        val localMax = runBlocking { CacheDB.INSTANCE.recordAV1DAO().getLastByAid(aid)?.number?.let { floor(it).toInt() } } ?: 0
+        CacheDB.INSTANCE.aniListScrobbleDAO().removeAbove(aid, localMax)
         AniListUnscrobbleWorker.enqueue(App.context, aid)
     }
 }
@@ -46,6 +50,8 @@ class AniListUnscrobbleWorker(context: Context, params: WorkerParameters) : Coro
         val aid = inputData.getInt(EXTRA_AID, 0)
         if (aid == 0 || !AniListAuth.isLoggedIn) return@withContext Result.success()
         val localMax = CacheDB.INSTANCE.recordAV1DAO().getLastByAid(aid)?.number?.let { floor(it).toInt() } ?: 0
+        CacheDB.INSTANCE.aniListScrobbleDAO().removeAbove(aid, localMax)
+        if (runAttemptCount >= MAX_ATTEMPTS) return@withContext Result.failure()
         val mapping = CacheDB.INSTANCE.aniListMappingDAO().byAid(aid)
         val directory = CacheDB.INSTANCE.directoryDAO().findByAid(aid)
         val slug = mapping?.slug ?: directory?.slug ?: return@withContext Result.failure()
@@ -56,21 +62,25 @@ class AniListUnscrobbleWorker(context: Context, params: WorkerParameters) : Coro
         }
         val (current, _) = AniListApi.currentProgress(mediaId) ?: return@withContext Result.retry()
         Log.i("AniList", "Unscrobble: aid=$aid mediaId=$mediaId actual=$current -> $localMax")
-        CacheDB.INSTANCE.aniListScrobbleDAO().removeAbove(aid, localMax)
         if (current == null || current <= localMax) return@withContext Result.success()
-        if (!AniListApi.saveProgress(mediaId, localMax, "CURRENT")) return@withContext Result.retry()
-        withContext(Dispatchers.Main) { "AniList: ${directory?.name ?: "anime"}, progreso bajado a episodio $localMax".toast() }
+        // Sin episodios vistos vuelve a "Planeado" en vez de quedar en "Viendo" con 0.
+        val status = if (localMax == 0) "PLANNING" else "CURRENT"
+        if (!AniListApi.saveProgress(mediaId, localMax, status)) return@withContext Result.retry()
+        val name = directory?.name ?: "anime"
+        val msg = if (localMax == 0) "AniList: $name vuelto a Planeado" else "AniList: $name, progreso bajado a episodio $localMax"
+        withContext(Dispatchers.Main) { msg.toast() }
         Result.success()
     }
 
     companion object {
         private const val EXTRA_AID = "anilist_aid"
+        private const val MAX_ATTEMPTS = 5
 
         fun enqueue(context: Context, aid: Int) {
             // Espera unos segundos y reemplaza: si el usuario desmarca varios seguidos, solo se manda una vez.
             val request = OneTimeWorkRequestBuilder<AniListUnscrobbleWorker>()
                 .setInputData(workDataOf(EXTRA_AID to aid))
-                .setInitialDelay(5, TimeUnit.SECONDS)
+                .setInitialDelay(2, TimeUnit.SECONDS)
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork("anilist-unscrobble-$aid", ExistingWorkPolicy.REPLACE, request)

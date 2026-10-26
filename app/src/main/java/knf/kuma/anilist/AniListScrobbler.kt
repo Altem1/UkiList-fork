@@ -109,6 +109,12 @@ class AniListScrobbleWorker(context: Context, params: WorkerParameters) : Corout
             if (runAttemptCount >= MAX_ATTEMPTS) { state(AniListScrobbleState.FAILED, reason); Result.failure() }
             else { state(AniListScrobbleState.PENDING, reason); Result.retry() }
 
+        // Si lo desmarcó mientras esperaba red, ya no se sube.
+        if (aid != 0 && inputData.getInt(EXTRA_MEDIA_ID, 0) == 0 &&
+            (CacheDB.INSTANCE.recordAV1DAO().getLastByAid(aid)?.number?.let { floor(it).toInt() } ?: 0) < episode) {
+            states.remove(slug, episode)
+            return@withContext Result.success()
+        }
         if (!AniListAuth.isLoggedIn) return@withContext failOrRetry(applicationContext.getString(R.string.anilist_reason_no_session))
         Log.i("AniList", "Scrobble: aid=$aid slug=$slug name=$name ep=$episode")
         val forced = inputData.getInt(EXTRA_MEDIA_ID, 0)
